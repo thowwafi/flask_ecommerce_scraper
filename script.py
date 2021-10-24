@@ -105,9 +105,6 @@ if __name__ == '__main__':
     element = driver.find_element_by_id("email-phone")
     element.send_keys("087877544953" + Keys.ENTER)
     sleep_time(3)
-    # element = driver.find_element_by_id("password-input")
-    # element.send_keys("Alpiphysics_27" + Keys.ENTER)
-    # sleep_time(3)
     element_ = driver.find_elements_by_xpath("//*[@class='unf-card css-19d2cr0-unf-card e1ukdezh0']")
     if element_:
         print("Got it")

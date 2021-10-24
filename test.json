@@ -1,0 +1,662 @@
+[
+    {
+        "data": {
+            "uohOrders": {
+                "__typename": "UOHOrdersResponse",
+                "categories": [
+                    {
+                        "__typename": "uohGenericItem",
+                        "label": "Belanja",
+                        "value": "marketplace,mp_pym"
+                    },
+                    {
+                        "__typename": "uohGenericItem",
+                        "label": "Top-up & Tagihan",
+                        "value": "pajak,pasca_bayar,upgrade_internet_tv,kartu_prakerja,paket_data,penerimaan_negara,pulsa,ovo,premi_asuransi,bridestory_pay,voucher_game,m_tix,iuran_properti,belajar,properti,samsat,internet_tv_kabel,angsuran_kredit,listrik_pln,telkom,biaya_pendidikan,gas_pgn,air_pdam,pajak_daerah,uang_elektronik,gopay,tagihan_cc,roaming,special_promo,retribusi,invoicing,streaming,bpjs"
+                    },
+                    {
+                        "__typename": "uohGenericItem",
+                        "label": "Travel & Entertainment",
+                        "value": "flight,deals,train,event,hotel"
+                    },
+                    {
+                        "__typename": "uohGenericItem",
+                        "label": "Keuangan",
+                        "value": "modal_toko,mutual_fund,insurance,gold,gift_card,insr_tec"
+                    },
+                    {
+                        "__typename": "uohGenericItem",
+                        "label": "Halal Corner",
+                        "value": "zakat_mal,donasi,wakaf,zakat_fitrah,umrah"
+                    },
+                    {
+                        "__typename": "uohGenericItem",
+                        "label": "Langsung Laku",
+                        "value": "money_in"
+                    },
+                    {
+                        "__typename": "uohGenericItem",
+                        "label": "Tokopedia Print",
+                        "value": "ls_print"
+                    },
+                    {
+                        "__typename": "uohGenericItem",
+                        "label": "Tokopedia NOW!",
+                        "value": "mp_pym_tokonow,tokonow"
+                    }
+                ],
+                "dateLimit": "2018-09-01",
+                "filtersV2": [
+                    {
+                        "__typename": "uohFiltersV2",
+                        "isPrimary": true,
+                        "label": "Semua Status Transaksi",
+                        "value": ""
+                    },
+                    {
+                        "__typename": "uohFiltersV2",
+                        "isPrimary": true,
+                        "label": "Transaksi Berlangsung",
+                        "value": "Dalam Proses"
+                    },
+                    {
+                        "__typename": "uohFiltersV2",
+                        "isPrimary": false,
+                        "label": "Menunggu Konfirmasi",
+                        "value": "menunggu_konfirmasi"
+                    },
+                    {
+                        "__typename": "uohFiltersV2",
+                        "isPrimary": false,
+                        "label": "Diproses",
+                        "value": "diproses"
+                    },
+                    {
+                        "__typename": "uohFiltersV2",
+                        "isPrimary": false,
+                        "label": "Dikirim",
+                        "value": "dikirim"
+                    },
+                    {
+                        "__typename": "uohFiltersV2",
+                        "isPrimary": false,
+                        "label": "Tiba di Tujuan",
+                        "value": "tiba_di_tujuan"
+                    },
+                    {
+                        "__typename": "uohFiltersV2",
+                        "isPrimary": false,
+                        "label": "Dikomplain",
+                        "value": "dikomplain"
+                    },
+                    {
+                        "__typename": "uohFiltersV2",
+                        "isPrimary": true,
+                        "label": "Berhasil",
+                        "value": "Berhasil"
+                    },
+                    {
+                        "__typename": "uohFiltersV2",
+                        "isPrimary": true,
+                        "label": "Tidak Berhasil",
+                        "value": "Tidak Berhasil"
+                    },
+                    {
+                        "__typename": "uohFiltersV2",
+                        "isPrimary": true,
+                        "label": "E-tiket & E-voucher Aktif",
+                        "value": "E-tiket & E-voucher Aktif"
+                    }
+                ],
+                "orders": [
+                    {
+                        "__typename": "uohOrder",
+                        "createBy": "orderapp",
+                        "createTime": "2021-10-08T08:15:44.740719Z",
+                        "metadata": {
+                            "__typename": "uohOrderContent",
+                            "buttons": [
+                                {
+                                    "Label": "Beri Ulasan",
+                                    "__typename": "uohButton",
+                                    "actionType": "link",
+                                    "appURL": "tokopedia://product-review/create/716389602/384570585",
+                                    "type": "filled",
+                                    "variantColor": "main",
+                                    "webURL": "https://m.tokopedia.com/inbox-reputation/review/716389602/384570585"
+                                }
+                            ],
+                            "detailURL": {
+                                "__typename": "uohDetailURL",
+                                "webTypeLink": "ROUTER_LINK",
+                                "webURL": "/order-details/marketplace/954912305?backBtn=true&upstream=MARKETPLACE"
+                            },
+                            "dotMenus": [
+                                {
+                                    "__typename": "uohActionItem",
+                                    "actionType": "gql-mp-atc",
+                                    "appURL": "",
+                                    "bgColor": "",
+                                    "label": "Beli Lagi",
+                                    "textColor": "",
+                                    "webURL": ""
+                                },
+                                {
+                                    "__typename": "uohActionItem",
+                                    "actionType": "gql-mp-chat",
+                                    "appURL": "tokopedia://topchat/askseller/3553434",
+                                    "bgColor": "",
+                                    "label": "Tanya Penjual",
+                                    "textColor": "",
+                                    "webURL": ""
+                                },
+                                {
+                                    "__typename": "uohActionItem",
+                                    "actionType": "link",
+                                    "appURL": "tokopedia://webview?url=https://m.tokopedia.com/help/reference-article?uoh=true&transaction_type_id=2&product_type_id=0&refnum_id=954912305&refnum=INV/20211008/MPL/1653550080&order_status=700&invoice_type_id=1&payment_status_id=2&payment_gateway_id=18",
+                                    "bgColor": "",
+                                    "label": "Bantuan",
+                                    "textColor": "",
+                                    "webURL": "https://m.tokopedia.com/help/reference-article?uoh=true&transaction_type_id=2&product_type_id=0&refnum_id=954912305&refnum=INV/20211008/MPL/1653550080&order_status=700&invoice_type_id=1&payment_status_id=2&payment_gateway_id=18"
+                                }
+                            ],
+                            "listProducts": "[{\"shop_id\":3553434,\"customer_id\":8193452,\"product_id\":384570585,\"product_name\":\"SUSU COLOSTRUM FORTICO / KOLOSTRUM isi 20 Sachet\",\"product_price\":300000,\"notes\":\"\",\"quantity\":1,\"warehouse_id\":2756777}]",
+                            "otherInfo": {
+                                "__typename": "uohActionItem",
+                                "actionType": "",
+                                "appURL": "",
+                                "bgColor": "",
+                                "label": "",
+                                "textColor": "",
+                                "webURL": ""
+                            },
+                            "paymentDate": "2021-10-08T15:15:44.699453936+07:00",
+                            "paymentDateStr": "8 Okt 2021",
+                            "products": [
+                                {
+                                    "__typename": "uohOrderItem",
+                                    "imageURL": "https://ecs7.tokopedia.net/img/cache/100-square/attachment/2019/7/17/156334179887257/156334179887257_3ce51452-d64d-47d1-b64e-8c62dd440241.png",
+                                    "inline1": {
+                                        "__typename": "uohTextMD",
+                                        "bgColor": "",
+                                        "label": "1 barang",
+                                        "textColor": ""
+                                    },
+                                    "inline2": {
+                                        "__typename": "uohTextMD",
+                                        "bgColor": "",
+                                        "label": "",
+                                        "textColor": ""
+                                    },
+                                    "title": "SUSU COLOSTRUM FORTICO / KOLOSTRUM isi 20 Sachet"
+                                }
+                            ],
+                            "queryParams": "{\"ICLogoOS\":\"https://ecs7.tokopedia.net/img/official_store/badge_official.png\",\"ICLogoPM\":\"https://ecs7.tokopedia.net/order/power_merchant_color.png\",\"ICLogoPMPro\":\"https://images.tokopedia.net/img/goldmerchant/pm_activation/badge/Power%20Merchant%20Pro@2x.png\",\"ICLogoTokoNow\":\"https://images.tokopedia.net/img/now/badge/now-badge.png\",\"accept_deadline\":\"2021-10-11 15:00:00\",\"confirm_shipping_deadline\":\"2021-10-11 16:00:00\",\"estimated_arrival_max_date\":\"2021-10-09 11:15:44\",\"estimated_arrival_min_date\":\"2021-10-08 15:15:44\",\"estimated_arrival_text\":\"Estimasi tiba 8 - 9 Oct\",\"invoice\":\"INV/20211008/MPL/1653550080\",\"invoice_url\":\"https://www.tokopedia.com/invoice?id=INV%2F20211008%2FMPL%2F1653550080\&source=\",\"is_power_merchant\":\"true\",\"order_id\":\"954912305\",\"payment_gateway_id\":\"18\",\"payment_status_id\":\"2\",\"product_id\":\"384570585\",\"product_snapshot_url\":\"https://www.tokopedia.com/snapshot_product?order_id=954912305\&dtl_id=1653550081\",\"reputation_id\":\"716389602\",\"role\":\"buyer\",\"shop_id\":\"3553434\",\"shop_name\":\"Elephant Egg Store\",\"shop_type\":\"3\",\"shop_url\":\"https://www.tokopedia.com/elephanteggstore\",\"status\":\"700\",\"user_id\":\"8193452\"}",
+                            "status": {
+                                "__typename": "uohTextMD",
+                                "bgColor": "#D6FFDE",
+                                "label": "Selesai",
+                                "textColor": "#03AC0E"
+                            },
+                            "tickers": [],
+                            "totalPrice": {
+                                "__typename": "uohGenericItem",
+                                "bgColor": "",
+                                "label": "Total Belanja",
+                                "textColor": "",
+                                "value": "Rp 301.300"
+                            },
+                            "upstream": "MARKETPLACE",
+                            "verticalLabel": "Belanja",
+                            "verticalLogo": "https://ecs7.tokopedia.net/img/email-footer-190118/new/icon-marketplace.png"
+                        },
+                        "orderUUID": "6ea46690-6349-40b8-950f-4ece938b29f3",
+                        "searchableText": "L7dPP9J/RvzyubBHGthri23Bvvs9e733r/wkoIkq1D9JnkbPgMS/1Bl2Ov4CMpQtx99TIucdJ9iDvgIpFhykvDM6p0v5vkoEfIGwuxhyJCQCTA0gtXvbk462bGq5U6h4zooGNKmx2Ne5NJWpBWr/86ZcKEoePRubaWVvqK4g56+TLRbgbnMZkSEA+Hj9Y8Br7mPcOehPEg==",
+                        "status": "Berhasil",
+                        "updateBy": "orderapp",
+                        "updateTime": "2021-10-08T12:58:05.73834Z",
+                        "userID": "8193452",
+                        "verticalCategory": "marketplace",
+                        "verticalID": "954912305",
+                        "verticalStatus": "700-single-product"
+                    },
+                    {
+                        "__typename": "uohOrder",
+                        "createBy": "orderapp",
+                        "createTime": "2021-10-08T08:14:25.778044Z",
+                        "metadata": {
+                            "__typename": "uohOrderContent",
+                            "buttons": [
+                                {
+                                    "Label": "Beri Ulasan",
+                                    "__typename": "uohButton",
+                                    "actionType": "link",
+                                    "appURL": "tokopedia://product-review/create/716389607/2041643783",
+                                    "type": "filled",
+                                    "variantColor": "main",
+                                    "webURL": "https://m.tokopedia.com/inbox-reputation/review/716389607/2041643783"
+                                }
+                            ],
+                            "detailURL": {
+                                "__typename": "uohDetailURL",
+                                "webTypeLink": "ROUTER_LINK",
+                                "webURL": "/order-details/marketplace/954909926?backBtn=true&upstream=MARKETPLACE"
+                            },
+                            "dotMenus": [
+                                {
+                                    "__typename": "uohActionItem",
+                                    "actionType": "gql-mp-atc",
+                                    "appURL": "",
+                                    "bgColor": "",
+                                    "label": "Beli Lagi",
+                                    "textColor": "",
+                                    "webURL": ""
+                                },
+                                {
+                                    "__typename": "uohActionItem",
+                                    "actionType": "gql-mp-chat",
+                                    "appURL": "tokopedia://topchat/askseller/8745073",
+                                    "bgColor": "",
+                                    "label": "Tanya Penjual",
+                                    "textColor": "",
+                                    "webURL": ""
+                                },
+                                {
+                                    "__typename": "uohActionItem",
+                                    "actionType": "link",
+                                    "appURL": "tokopedia://webview?url=https://m.tokopedia.com/help/reference-article?uoh=true&transaction_type_id=2&product_type_id=0&refnum_id=954909926&refnum=INV/20211008/MPL/1653544211&order_status=700&invoice_type_id=1&payment_status_id=2&payment_gateway_id=18",
+                                    "bgColor": "",
+                                    "label": "Bantuan",
+                                    "textColor": "",
+                                    "webURL": "https://m.tokopedia.com/help/reference-article?uoh=true&transaction_type_id=2&product_type_id=0&refnum_id=954909926&refnum=INV/20211008/MPL/1653544211&order_status=700&invoice_type_id=1&payment_status_id=2&payment_gateway_id=18"
+                                }
+                            ],
+                            "listProducts": "[{\"shop_id\":8745073,\"customer_id\":8193452,\"product_id\":2041643783,\"product_name\":\"MADU ZESTMAG MADU LAMBUNG MADU ZETMAG MADU ZESTMAG ORIGINAL ZESMAG\",\"product_price\":145000,\"notes\":\"\",\"quantity\":1,\"warehouse_id\":8901979}]",
+                            "otherInfo": {
+                                "__typename": "uohActionItem",
+                                "actionType": "",
+                                "appURL": "",
+                                "bgColor": "",
+                                "label": "",
+                                "textColor": "",
+                                "webURL": ""
+                            },
+                            "paymentDate": "2021-10-08T15:14:25.739240919+07:00",
+                            "paymentDateStr": "8 Okt 2021",
+                            "products": [
+                                {
+                                    "__typename": "uohOrderItem",
+                                    "imageURL": "https://ecs7.tokopedia.net/img/cache/100-square/VqbcmM/2021/8/2/942908d5-3f69-44be-8733-13d6319a587d.jpg",
+                                    "inline1": {
+                                        "__typename": "uohTextMD",
+                                        "bgColor": "",
+                                        "label": "1 barang",
+                                        "textColor": ""
+                                    },
+                                    "inline2": {
+                                        "__typename": "uohTextMD",
+                                        "bgColor": "",
+                                        "label": "",
+                                        "textColor": ""
+                                    },
+                                    "title": "MADU ZESTMAG MADU LAMBUNG MADU ZETMAG MADU ZESTMAG ORIGINAL ZESMAG"
+                                }
+                            ],
+                            "queryParams": "{\"ICLogoOS\":\"https://ecs7.tokopedia.net/img/official_store/badge_official.png\",\"ICLogoPM\":\"https://ecs7.tokopedia.net/order/power_merchant_color.png\",\"ICLogoPMPro\":\"https://images.tokopedia.net/img/goldmerchant/pm_activation/badge/Power%20Merchant%20Pro@2x.png\",\"ICLogoTokoNow\":\"https://images.tokopedia.net/img/now/badge/now-badge.png\",\"accept_deadline\":\"2021-10-11 15:00:00\",\"confirm_shipping_deadline\":\"2021-10-11 16:00:00\",\"estimated_arrival_max_date\":\"2021-10-09 17:14:25\",\"estimated_arrival_min_date\":\"2021-10-09 11:14:25\",\"estimated_arrival_text\":\"Estimasi tiba 9 Oct\",\"invoice\":\"INV/20211008/MPL/1653544211\",\"invoice_url\":\"https://www.tokopedia.com/invoice?id=INV%2F20211008%2FMPL%2F1653544211\&source=\",\"is_power_merchant\":\"true\",\"order_id\":\"954909926\",\"payment_gateway_id\":\"18\",\"payment_status_id\":\"2\",\"product_id\":\"2041643783\",\"product_snapshot_url\":\"https://www.tokopedia.com/snapshot_product?order_id=954909926\&dtl_id=1653544212\",\"reputation_id\":\"716389607\",\"role\":\"buyer\",\"shop_id\":\"8745073\",\"shop_name\":\"AULIASHOP2808\",\"shop_type\":\"3\",\"shop_url\":\"https://www.tokopedia.com/auliashop2808\",\"status\":\"700\",\"user_id\":\"8193452\"}",
+                            "status": {
+                                "__typename": "uohTextMD",
+                                "bgColor": "#D6FFDE",
+                                "label": "Selesai",
+                                "textColor": "#03AC0E"
+                            },
+                            "tickers": [],
+                            "totalPrice": {
+                                "__typename": "uohGenericItem",
+                                "bgColor": "",
+                                "label": "Total Belanja",
+                                "textColor": "",
+                                "value": "Rp 171.800"
+                            },
+                            "upstream": "MARKETPLACE",
+                            "verticalLabel": "Belanja",
+                            "verticalLogo": "https://ecs7.tokopedia.net/img/email-footer-190118/new/icon-marketplace.png"
+                        },
+                        "orderUUID": "6c3c653a-f87c-46d8-80ce-f09f6e18056f",
+                        "searchableText": "lFpbZ46oOQCVSP7lLS+H8fNvL1ZkkxPD3pNAW0ieBUMc46Mu9ZAXnTF3BS+ZuV0ol7CZohtk1AE3lm/YvD9WnNlVcSUuKYMiAlqTENxSeqL6/KCuj/SHMibBY3ktAipwc/ti3mrZs2J59dQiX3qGMVw2NSuAcXYYaO2JlNfvHIk3sevdFAcARMCx0uhhFNR9X+7AM4YTn1T5JSCedEOGOSwbYaY=",
+                        "status": "Berhasil",
+                        "updateBy": "orderapp",
+                        "updateTime": "2021-10-08T12:58:05.781395Z",
+                        "userID": "8193452",
+                        "verticalCategory": "marketplace",
+                        "verticalID": "954909926",
+                        "verticalStatus": "700-single-product"
+                    },
+                    {
+                        "__typename": "uohOrder",
+                        "createBy": "orderapp",
+                        "createTime": "2021-10-04T06:59:21.540749Z",
+                        "metadata": {
+                            "__typename": "uohOrderContent",
+                            "buttons": [
+                                {
+                                    "Label": "Beri Ulasan",
+                                    "__typename": "uohButton",
+                                    "actionType": "link",
+                                    "appURL": "tokopedia://product-review/create/714328115/1160053207",
+                                    "type": "filled",
+                                    "variantColor": "main",
+                                    "webURL": "https://m.tokopedia.com/inbox-reputation/review/714328115/1160053207"
+                                }
+                            ],
+                            "detailURL": {
+                                "__typename": "uohDetailURL",
+                                "webTypeLink": "ROUTER_LINK",
+                                "webURL": "/order-details/marketplace/950407122?backBtn=true&upstream=MARKETPLACE"
+                            },
+                            "dotMenus": [
+                                {
+                                    "__typename": "uohActionItem",
+                                    "actionType": "gql-mp-atc",
+                                    "appURL": "",
+                                    "bgColor": "",
+                                    "label": "Beli Lagi",
+                                    "textColor": "",
+                                    "webURL": ""
+                                },
+                                {
+                                    "__typename": "uohActionItem",
+                                    "actionType": "gql-mp-chat",
+                                    "appURL": "tokopedia://topchat/askseller/1879871",
+                                    "bgColor": "",
+                                    "label": "Tanya Penjual",
+                                    "textColor": "",
+                                    "webURL": ""
+                                },
+                                {
+                                    "__typename": "uohActionItem",
+                                    "actionType": "link",
+                                    "appURL": "tokopedia://webview?url=https://m.tokopedia.com/help/reference-article?uoh=true&transaction_type_id=2&product_type_id=0&refnum_id=950407122&refnum=INV/20211004/MPL/1642147169&order_status=700&invoice_type_id=1&payment_status_id=2&payment_gateway_id=42",
+                                    "bgColor": "",
+                                    "label": "Bantuan",
+                                    "textColor": "",
+                                    "webURL": "https://m.tokopedia.com/help/reference-article?uoh=true&transaction_type_id=2&product_type_id=0&refnum_id=950407122&refnum=INV/20211004/MPL/1642147169&order_status=700&invoice_type_id=1&payment_status_id=2&payment_gateway_id=42"
+                                }
+                            ],
+                            "listProducts": "[{\"shop_id\":1879871,\"customer_id\":8193452,\"product_id\":1160053207,\"product_name\":\"Cetaphil Gentle Baby Wash and Shampoo - 400mL - 400ML GLYCERIN\",\"product_price\":110000,\"notes\":\"\",\"quantity\":1,\"warehouse_id\":1504190}]",
+                            "otherInfo": {
+                                "__typename": "uohActionItem",
+                                "actionType": "",
+                                "appURL": "",
+                                "bgColor": "",
+                                "label": "",
+                                "textColor": "",
+                                "webURL": ""
+                            },
+                            "paymentDate": "2021-10-04T13:59:21.47845765+07:00",
+                            "paymentDateStr": "4 Okt 2021",
+                            "products": [
+                                {
+                                    "__typename": "uohOrderItem",
+                                    "imageURL": "https://ecs7.tokopedia.net/img/cache/100-square/product-1/2020/9/9/16595152/16595152_83833ded-0b8d-4b57-b1af-0afbdd0265e5_1000_1000",
+                                    "inline1": {
+                                        "__typename": "uohTextMD",
+                                        "bgColor": "",
+                                        "label": "1 barang",
+                                        "textColor": ""
+                                    },
+                                    "inline2": {
+                                        "__typename": "uohTextMD",
+                                        "bgColor": "",
+                                        "label": "",
+                                        "textColor": ""
+                                    },
+                                    "title": "Cetaphil Gentle Baby Wash and Shampoo - 400mL - 400ML GLYCERIN"
+                                }
+                            ],
+                            "queryParams": "{\"ICLogoOS\":\"https://ecs7.tokopedia.net/img/official_store/badge_official.png\",\"ICLogoPM\":\"https://ecs7.tokopedia.net/order/power_merchant_color.png\",\"ICLogoPMPro\":\"https://images.tokopedia.net/img/goldmerchant/pm_activation/badge/Power%20Merchant%20Pro@2x.png\",\"ICLogoTokoNow\":\"https://images.tokopedia.net/img/now/badge/now-badge.png\",\"accept_deadline\":\"2021-10-05 13:59:24\",\"confirm_shipping_deadline\":\"2021-10-06 13:59:24\",\"estimated_arrival_max_date\":\"2021-10-06 17:59:21\",\"estimated_arrival_min_date\":\"2021-10-05 13:59:21\",\"estimated_arrival_text\":\"Estimasi tiba 5 - 6 Oct\",\"invoice\":\"INV/20211004/MPL/1642147169\",\"invoice_url\":\"https://www.tokopedia.com/invoice?id=INV%2F20211004%2FMPL%2F1642147169\&source=\",\"is_power_merchant\":\"true\",\"order_id\":\"950407122\",\"payment_gateway_id\":\"42\",\"payment_status_id\":\"2\",\"product_id\":\"1160053207\",\"product_snapshot_url\":\"https://www.tokopedia.com/snapshot_product?order_id=950407122\&dtl_id=1642147170\",\"reputation_id\":\"714328115\",\"role\":\"buyer\",\"shop_id\":\"1879871\",\"shop_name\":\"Baby`S Stuff\",\"shop_type\":\"3\",\"shop_url\":\"https://www.tokopedia.com/babys-stuff\",\"status\":\"700\",\"user_id\":\"8193452\"}",
+                            "status": {
+                                "__typename": "uohTextMD",
+                                "bgColor": "#D6FFDE",
+                                "label": "Selesai",
+                                "textColor": "#03AC0E"
+                            },
+                            "tickers": [],
+                            "totalPrice": {
+                                "__typename": "uohGenericItem",
+                                "bgColor": "",
+                                "label": "Total Belanja",
+                                "textColor": "",
+                                "value": "Rp 110.500"
+                            },
+                            "upstream": "MARKETPLACE",
+                            "verticalLabel": "Belanja",
+                            "verticalLogo": "https://ecs7.tokopedia.net/img/email-footer-190118/new/icon-marketplace.png"
+                        },
+                        "orderUUID": "9b8442a8-9ce2-43c0-aa38-bd52b5e172f8",
+                        "searchableText": "D4Ny3zQiI5sHcvjJazL7kxhMTvWoM/L9oO5c6+5Nxf8vBeFpWBMN23AeNxhEMz/nYghU/BwHy8nz6JS5IluuRqUlN8ukP9Kc9SzrKuC2Bi4kpJJlRfjVV5/EGz36QIP6N12qe5a6nyrAOdo7x6ftD+LrqVCdUT5zpXxig6xUE+lRFXW5dRvm0tFRGQg6cvFaP09QPmCwwiw8iWixf1nj",
+                        "status": "Berhasil",
+                        "updateBy": "orderapp",
+                        "updateTime": "2021-10-06T10:40:21.08685Z",
+                        "userID": "8193452",
+                        "verticalCategory": "marketplace",
+                        "verticalID": "950407122",
+                        "verticalStatus": "700-single-product"
+                    },
+                    {
+                        "__typename": "uohOrder",
+                        "createBy": "orderapp",
+                        "createTime": "2021-10-04T06:56:06.193753Z",
+                        "metadata": {
+                            "__typename": "uohOrderContent",
+                            "buttons": [],
+                            "detailURL": {
+                                "__typename": "uohDetailURL",
+                                "webTypeLink": "ROUTER_LINK",
+                                "webURL": "/order-details/marketplace/950402432?backBtn=true&upstream=MARKETPLACE"
+                            },
+                            "dotMenus": [
+                                {
+                                    "__typename": "uohActionItem",
+                                    "actionType": "link",
+                                    "appURL": "tokopedia://webview?url=https://m.tokopedia.com/help/reference-article?uoh=true&transaction_type_id=2&product_type_id=0&refnum_id=950402432&refnum=INV/20211004/MPL/1642135145&order_status=15&invoice_type_id=1&payment_status_id=2&payment_gateway_id=42",
+                                    "bgColor": "",
+                                    "label": "Bantuan",
+                                    "textColor": "",
+                                    "webURL": "https://m.tokopedia.com/help/reference-article?uoh=true&transaction_type_id=2&product_type_id=0&refnum_id=950402432&refnum=INV/20211004/MPL/1642135145&order_status=15&invoice_type_id=1&payment_status_id=2&payment_gateway_id=42"
+                                }
+                            ],
+                            "listProducts": "[{\"shop_id\":1879871,\"customer_id\":8193452,\"product_id\":1160053207,\"product_name\":\"Cetaphil Gentle Baby Wash and Shampoo - 400mL - 400ML GLYCERIN\",\"product_price\":110000,\"notes\":\"\",\"quantity\":1,\"warehouse_id\":1504190}]",
+                            "otherInfo": {
+                                "__typename": "uohActionItem",
+                                "actionType": "",
+                                "appURL": "",
+                                "bgColor": "",
+                                "label": "",
+                                "textColor": "",
+                                "webURL": ""
+                            },
+                            "paymentDate": "2021-10-04T13:56:06.109998837+07:00",
+                            "paymentDateStr": "4 Okt 2021",
+                            "products": [
+                                {
+                                    "__typename": "uohOrderItem",
+                                    "imageURL": "https://ecs7.tokopedia.net/img/cache/100-square/product-1/2020/9/9/16595152/16595152_83833ded-0b8d-4b57-b1af-0afbdd0265e5_1000_1000",
+                                    "inline1": {
+                                        "__typename": "uohTextMD",
+                                        "bgColor": "",
+                                        "label": "1 barang",
+                                        "textColor": ""
+                                    },
+                                    "inline2": {
+                                        "__typename": "uohTextMD",
+                                        "bgColor": "",
+                                        "label": "",
+                                        "textColor": ""
+                                    },
+                                    "title": "Cetaphil Gentle Baby Wash and Shampoo - 400mL - 400ML GLYCERIN"
+                                }
+                            ],
+                            "queryParams": "{\"ICLogoOS\":\"https://ecs7.tokopedia.net/img/official_store/badge_official.png\",\"ICLogoPM\":\"https://ecs7.tokopedia.net/order/power_merchant_color.png\",\"ICLogoPMPro\":\"https://images.tokopedia.net/img/goldmerchant/pm_activation/badge/Power%20Merchant%20Pro@2x.png\",\"ICLogoTokoNow\":\"https://images.tokopedia.net/img/now/badge/now-badge.png\",\"accept_deadline\":\"2021-10-05 13:56:10\",\"confirm_shipping_deadline\":\"2021-10-06 13:56:10\",\"estimated_arrival_max_date\":\"2021-10-06 17:56:06\",\"estimated_arrival_min_date\":\"2021-10-05 13:56:06\",\"estimated_arrival_text\":\"Estimasi tiba 5 - 6 Oct\",\"invoice\":\"INV/20211004/MPL/1642135145\",\"invoice_url\":\"https://www.tokopedia.com/invoice?id=INV%2F20211004%2FMPL%2F1642135145\&source=\",\"is_power_merchant\":\"true\",\"order_id\":\"950402432\",\"payment_gateway_id\":\"42\",\"payment_status_id\":\"2\",\"product_snapshot_url\":\"https://www.tokopedia.com/snapshot_product?order_id=950402432\&dtl_id=1642135147\",\"role\":\"buyer\",\"shop_id\":\"1879871\",\"shop_name\":\"Baby`S Stuff\",\"shop_type\":\"3\",\"shop_url\":\"https://www.tokopedia.com/babys-stuff\",\"status\":\"15\",\"user_id\":\"8193452\"}",
+                            "status": {
+                                "__typename": "uohTextMD",
+                                "bgColor": "#FFEAEF",
+                                "label": "Dibatalkan",
+                                "textColor": "#EF144A"
+                            },
+                            "tickers": [],
+                            "totalPrice": {
+                                "__typename": "uohGenericItem",
+                                "bgColor": "",
+                                "label": "Total Belanja",
+                                "textColor": "",
+                                "value": "Rp 110.500"
+                            },
+                            "upstream": "MARKETPLACE",
+                            "verticalLabel": "Belanja",
+                            "verticalLogo": "https://ecs7.tokopedia.net/img/email-footer-190118/new/icon-marketplace.png"
+                        },
+                        "orderUUID": "a77701ae-f6f9-4509-afed-a7e79a7aebc5",
+                        "searchableText": "3zs5F4+jYZ4V5GHvr85F/3cGnn9BhD9PhNZkvEcVeIkfskER5jMcARJXJyk7MjmVODdJ6kPuWBlS2rRHnCrsDlFJQ8bp+GGHaDfEpKukxTKG43UKwqVxi0vo4T6BSarmPBPkuRTE4OLLLFEOoB5hFqka3tFSwVRAV3WfKhCI5+yo3fjajU8x0QvUCX1iP9B9AP9AuVDhTA1D8FDF5KdP",
+                        "status": "Tidak Berhasil",
+                        "updateBy": "orderapp",
+                        "updateTime": "2021-10-04T06:58:16.83931Z",
+                        "userID": "8193452",
+                        "verticalCategory": "marketplace",
+                        "verticalID": "950402432",
+                        "verticalStatus": "15"
+                    },
+                    {
+                        "__typename": "uohOrder",
+                        "createBy": "orderapp",
+                        "createTime": "2021-10-01T06:42:55.668989Z",
+                        "metadata": {
+                            "__typename": "uohOrderContent",
+                            "buttons": [
+                                {
+                                    "Label": "Beri Ulasan",
+                                    "__typename": "uohButton",
+                                    "actionType": "link",
+                                    "appURL": "tokopedia://product-review/create/710270770/1099097658",
+                                    "type": "filled",
+                                    "variantColor": "main",
+                                    "webURL": "https://m.tokopedia.com/inbox-reputation/review/710270770/1099097658"
+                                }
+                            ],
+                            "detailURL": {
+                                "__typename": "uohDetailURL",
+                                "webTypeLink": "ROUTER_LINK",
+                                "webURL": "/order-details/marketplace/947336870?backBtn=true&upstream=MARKETPLACE"
+                            },
+                            "dotMenus": [
+                                {
+                                    "__typename": "uohActionItem",
+                                    "actionType": "gql-mp-atc",
+                                    "appURL": "",
+                                    "bgColor": "",
+                                    "label": "Beli Lagi",
+                                    "textColor": "",
+                                    "webURL": ""
+                                },
+                                {
+                                    "__typename": "uohActionItem",
+                                    "actionType": "gql-mp-chat",
+                                    "appURL": "tokopedia://topchat/askseller/3309255",
+                                    "bgColor": "",
+                                    "label": "Tanya Penjual",
+                                    "textColor": "",
+                                    "webURL": ""
+                                },
+                                {
+                                    "__typename": "uohActionItem",
+                                    "actionType": "link",
+                                    "appURL": "tokopedia://webview?url=https://m.tokopedia.com/help/reference-article?uoh=true&transaction_type_id=2&product_type_id=0&refnum_id=947336870&refnum=INV/20211001/MPL/1634319959&order_status=700&invoice_type_id=1&payment_status_id=2&payment_gateway_id=42",
+                                    "bgColor": "",
+                                    "label": "Bantuan",
+                                    "textColor": "",
+                                    "webURL": "https://m.tokopedia.com/help/reference-article?uoh=true&transaction_type_id=2&product_type_id=0&refnum_id=947336870&refnum=INV/20211001/MPL/1634319959&order_status=700&invoice_type_id=1&payment_status_id=2&payment_gateway_id=42"
+                                }
+                            ],
+                            "listProducts": "[{\"shop_id\":3309255,\"customer_id\":8193452,\"product_id\":1099097658,\"product_name\":\"LONG TOP BUTTON(ATASAN LENGAN PANJANG ANAK)NEW - MAUVE, 2Y\",\"product_price\":72200,\"notes\":\"\",\"quantity\":1,\"warehouse_id\":2609481},{\"shop_id\":3309255,\"customer_id\":8193452,\"product_id\":1099097657,\"product_name\":\"LONG TOP BUTTON(ATASAN LENGAN PANJANG ANAK)NEW - BLACK, 2Y\",\"product_price\":72200,\"notes\":\"\",\"quantity\":1,\"warehouse_id\":2609481}]",
+                            "otherInfo": {
+                                "__typename": "uohActionItem",
+                                "actionType": "",
+                                "appURL": "",
+                                "bgColor": "",
+                                "label": "+1 produk lainnya",
+                                "textColor": "",
+                                "webURL": ""
+                            },
+                            "paymentDate": "2021-10-01T13:42:55.59544206+07:00",
+                            "paymentDateStr": "1 Okt 2021",
+                            "products": [
+                                {
+                                    "__typename": "uohOrderItem",
+                                    "imageURL": "https://ecs7.tokopedia.net/img/cache/100-square/product-1/2020/9/8/31172838/31172838_0c482682-e243-47c0-8905-7a0b05d43666_1773_1773",
+                                    "inline1": {
+                                        "__typename": "uohTextMD",
+                                        "bgColor": "",
+                                        "label": "1 barang",
+                                        "textColor": ""
+                                    },
+                                    "inline2": {
+                                        "__typename": "uohTextMD",
+                                        "bgColor": "",
+                                        "label": "",
+                                        "textColor": ""
+                                    },
+                                    "title": "LONG TOP BUTTON(ATASAN LENGAN PANJANG ANAK)NEW - MAUVE, 2Y"
+                                }
+                            ],
+                            "queryParams": "{\"ICLogoOS\":\"https://ecs7.tokopedia.net/img/official_store/badge_official.png\",\"ICLogoPM\":\"https://ecs7.tokopedia.net/order/power_merchant_color.png\",\"ICLogoPMPro\":\"https://images.tokopedia.net/img/goldmerchant/pm_activation/badge/Power%20Merchant%20Pro@2x.png\",\"ICLogoTokoNow\":\"https://images.tokopedia.net/img/now/badge/now-badge.png\",\"accept_deadline\":\"2021-10-04 13:43:02\",\"confirm_shipping_deadline\":\"2021-10-04 16:00:00\",\"estimated_arrival_max_date\":\"2021-10-01 18:42:55\",\"estimated_arrival_min_date\":\"2021-10-01 14:42:55\",\"estimated_arrival_text\":\"Estimasi tiba 1 Oct\",\"invoice\":\"INV/20211001/MPL/1634319959\",\"invoice_url\":\"https://www.tokopedia.com/invoice?id=INV%2F20211001%2FMPL%2F1634319959\&source=\",\"is_official_store\":\"true\",\"order_id\":\"947336870\",\"payment_gateway_id\":\"42\",\"payment_status_id\":\"2\",\"product_id\":\"1099097658\",\"product_snapshot_url\":\"https://www.tokopedia.com/snapshot_product?order_id=947336870\&dtl_id=1634319960\",\"reputation_id\":\"710270770\",\"role\":\"buyer\",\"shop_id\":\"3309255\",\"shop_name\":\"Bohopanna\",\"shop_type\":\"2\",\"shop_url\":\"https://www.tokopedia.com/bohopannaofficial\",\"status\":\"700\",\"user_id\":\"8193452\"}",
+                            "status": {
+                                "__typename": "uohTextMD",
+                                "bgColor": "#D6FFDE",
+                                "label": "Selesai",
+                                "textColor": "#03AC0E"
+                            },
+                            "tickers": [],
+                            "totalPrice": {
+                                "__typename": "uohGenericItem",
+                                "bgColor": "",
+                                "label": "Total Belanja",
+                                "textColor": "",
+                                "value": "Rp 165.400"
+                            },
+                            "upstream": "MARKETPLACE",
+                            "verticalLabel": "Belanja",
+                            "verticalLogo": "https://ecs7.tokopedia.net/img/email-footer-190118/new/icon-marketplace.png"
+                        },
+                        "orderUUID": "0426591b-edff-45d8-ae49-07bfefb8b0c1",
+                        "searchableText": "EbiUsERlMMGXXsWYWDVnLJQoufKthYSXu9XH+3zR4GZQXmqrXNTvcEatKbNPGvqLjB0uXZ7+FfI5dzb3ATFMps1KeW8GuQN6qk3/FPMIBXNQYlbMEC7bOpW+BksPNdTUkcm+KgkwZiDSLzai6QOjhlYvoBtZ0DcC311IsKY0CfuFNZE8wYbyRujG6YO4I7UByCSWk2CQ9wHMnzaBiCbjWMZoxpTwqTiSFwNkAhOh8VCbTrwAX6K8dCmQ5u5tFouB1rX94rMSx3A2JomVuoZ3bC9nPw==",
+                        "status": "Berhasil",
+                        "updateBy": "orderapp",
+                        "updateTime": "2021-10-01T13:20:10.986628Z",
+                        "userID": "8193452",
+                        "verticalCategory": "marketplace",
+                        "verticalID": "947336870",
+                        "verticalStatus": "700-single-product"
+                    }
+                ],
+                "tickers": [
+                    {
+                        "__typename": "uohTicker",
+                        "action": {
+                            "__typename": "uohActionItem",
+                            "actionType": "link",
+                            "appURL": "tokopedia://webview?url=https://m.tokopedia.com/myorder/buyer/ticker-info",
+                            "bgColor": "",
+                            "label": "Info Selengkapnya",
+                            "textColor": "",
+                            "webURL": "https://m.tokopedia.com/myorder/buyer/ticker-info"
+                        },
+                        "isFull": false,
+                        "text": "Info Pengembangan Sistem",
+                        "title": "Info Seputar Belanja",
+                        "type": "default"
+                    }
+                ],
+                "totalOrders": 5
+            }
+        }
+    }
+]
