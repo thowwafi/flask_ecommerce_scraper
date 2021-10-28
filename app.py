@@ -1,5 +1,6 @@
 import ast
 import base64
+from datetime import datetime
 from flask import Flask
 from flask import request, jsonify
 from flask import Response
@@ -15,6 +16,7 @@ from selenium.webdriver.common.keys import Keys
 from seleniumrequests import Chrome
 import sys
 import time
+from .TokopediaScraper import TokopediaScraper
 
 
 app = Flask(__name__)
@@ -250,19 +252,19 @@ def sleep_time(number):
         time.sleep(1)
 
 
-@app.route('/api/new_way/', methods=['POST'])
-def new_way():
-    new_url = "https://accounts.tokopedia.com/login"
+@app.route('/api/request_otp/', methods=['POST'])
+def request_otp():
     request_data = request.json
     phone = request_data.get('phone')
+
+    tokped = TokopediaScraper(phone=phone)
+
     driver = check_chrome_driver()
-    driver.get(new_url)
-    sleep_time(3)
-    driver.find_element_by_id("email").send_keys(phone + Keys.ENTER)
+    driver.get(url)
     sleep_time(3)
     driver.find_element_by_id("cotp__method--sms").click()
     response = {
-        "url": driver.current_url
+        "message": "SMS has been sent."
     }
     driver.quit()
     return jsonify(response)
@@ -288,9 +290,15 @@ def new_otp():
         selected_el[0].click()
     driver.get(web_url + "/order-list")
     sleep_time(3)
-    pickle.dump( driver.get_cookies(), open("cookies.pkl","wb"))
+    session_id = datetime.now().strftime("%Y%m%d%H%M%S")
+    cookies_folder = os.path.join(app.instance_path, 'cookies')
+    if not os.path.exists(cookies_folder):
+        os.makedirs(cookies_folder)
+    cookie_file = os.path.join(cookies_folder, f"cookies_{session_id}.pkl")
+    pickle.dump(driver.get_cookies(), open(cookie_file, "wb"))
     response = {
-        "message": "Successfully login"
+        "message": "Successfully login",
+        "session_id": session_id
     }
     driver.quit()
     return jsonify(response)
@@ -307,10 +315,8 @@ def new_transactions():
     payload = [{"operationName":"GetOrderHistory","variables":{"VerticalCategory":"","Status":"","SearchableText":"","CreateTimeStart":"2021-10-01","CreateTimeEnd":"2021-10-11","Page":1,"Limit":10},"query":"query GetOrderHistory($VerticalCategory: String!, $Status: String!, $SearchableText: String!, $CreateTimeStart: String!, $CreateTimeEnd: String!, $Page: Int!, $Limit: Int!) {\n  uohOrders(input: {UUID: \"\", VerticalID: \"\", VerticalCategory: $VerticalCategory, Status: $Status, SearchableText: $SearchableText, CreateTime: \"\", CreateTimeStart: $CreateTimeStart, CreateTimeEnd: $CreateTimeEnd, Page: $Page, Limit: $Limit, SortBy: \"\", IsSortAsc: false}) {\n    orders {\n      orderUUID\n      verticalID\n      verticalCategory\n      userID\n      status\n      verticalStatus\n      searchableText\n      metadata {\n        upstream\n        verticalLogo\n        verticalLabel\n        paymentDate\n        paymentDateStr\n        queryParams\n        listProducts\n        detailURL {\n          webURL\n          webTypeLink\n          __typename\n        }\n        status {\n          label\n          textColor\n          bgColor\n          __typename\n        }\n        products {\n          title\n          imageURL\n          inline1 {\n            label\n            textColor\n            bgColor\n            __typename\n          }\n          inline2 {\n            label\n            textColor\n            bgColor\n            __typename\n          }\n          __typename\n        }\n        otherInfo {\n          actionType\n          appURL\n          webURL\n          label\n          textColor\n          bgColor\n          __typename\n        }\n        totalPrice {\n          value\n          label\n          textColor\n          bgColor\n          __typename\n        }\n        tickers {\n          action {\n            actionType\n            appURL\n            webURL\n            label\n            textColor\n            bgColor\n            __typename\n          }\n          title\n          text\n          type\n          isFull\n          __typename\n        }\n        buttons {\n          Label\n          variantColor\n          type\n          actionType\n          appURL\n          webURL\n          __typename\n        }\n        dotMenus {\n          actionType\n          appURL\n          webURL\n          label\n          textColor\n          bgColor\n          __typename\n        }\n        __typename\n      }\n      createTime\n      createBy\n      updateTime\n      updateBy\n      __typename\n    }\n    totalOrders\n    filtersV2 {\n      label\n      value\n      isPrimary\n      __typename\n    }\n    categories {\n      value\n      label\n      __typename\n    }\n    dateLimit\n    tickers {\n      action {\n        actionType\n        appURL\n        webURL\n        label\n        textColor\n        bgColor\n        __typename\n      }\n      title\n      text\n      type\n      isFull\n      __typename\n    }\n    __typename\n  }\n}\n"}]
     json_data = json.dumps(payload)
     gql_url = "https://gql.tokopedia.com/"
-    print("here")
     res = sess.post(gql_url, json_data, headers=headers)
     datares = json.loads(res.text)
-    print(datares)
     return jsonify(datares)
 
 
