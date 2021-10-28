@@ -82,16 +82,16 @@ def hello_world():
     print(app.root_path)
     return "Hello World"
 
-CHROMEDRIVER_PATH = os.path.join(app.root_path, "chromedriver")
-def check_chrome_driver():
+def initialize_webdriver():
+    CHROMEDRIVER_PATH = os.path.join(app.root_path, "chromedriver")
     try:
         options = Options()
         # options.add_argument("--headless")
-        return webdriver.Chrome(executable_path=CHROMEDRIVER_PATH, options=options)
+        return webdriver.Chrome(executable_path=CHROMEDRIVER_PATH, options=options), "Ok"
     except OSError:
-        sys.exit("Chrome webdriver not matching with OS")
+        return None, "Chrome webdriver not matching with OS"
     except Exception as e:
-        sys.exit(str(e))
+        return None, e
 
 def create_response(message, status):
     return jsonify({
@@ -259,24 +259,35 @@ def request_otp():
 
     tokped = TokopediaScraper(phone=phone)
 
-    driver = check_chrome_driver()
-    driver.get(url)
-    sleep_time(3)
-    driver.find_element_by_id("cotp__method--sms").click()
-    response = {
-        "message": "SMS has been sent."
-    }
-    driver.quit()
+    response = {}
+    driver, message = initialize_webdriver()
+    if not driver:
+        response['message'] = message
+        response['status'] = 'Failed'
+        return jsonify(response)
+
+    try:
+        tokped.request_otp(driver)
+    except Exception as e:
+        response['message'] = e
+        response['status'] = 'Failed'
+        return jsonify(response)
+
+    response['message'] = "SMS has been sent."
+    response['status'] = "Success"
+    response['otp_token'] = tokped.encoded_phone
     return jsonify(response)
 
 
-@app.route('/api/new_otp/', methods=['POST'])
-def new_otp():
+@app.route('/api/send_otp/', methods=['POST'])
+def send_otp():
     request_data = request.json
     otp = request_data.get('otp')
-    url = request_data.get('url')
+    otp_token = request_data.get('otp_token')
     email = request_data.get('email')
-    driver = check_chrome_driver()
+
+    
+    driver, message = initialize_webdriver()
     driver.get(url)
     sleep_time(3)
     driver.find_element_by_id("cotp__method--sms").click()
@@ -328,7 +339,7 @@ def get_transactions():
     end_at = request_data.get('end_at')
     if not phone or not start_at or not end_at:
         return jsonify({"message": "Phone/Start At/End At cannot be empty."}), 400
-    driver = check_chrome_driver()
+    driver, message = initialize_webdriver()
     driver.get(web_url)
     my_element = driver.find_element_by_xpath("//button[text()='Masuk']")
     my_element.click()
