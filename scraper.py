@@ -1,13 +1,18 @@
+import ast
+import base64
 from flask import Flask
 from flask import request, jsonify
 from flask import Response
+import hashlib
 import json
 import os
 from pprint import pprint
+import pickle
 import requests
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.keys import Keys
+from seleniumrequests import Chrome
 import sys
 import time
 
@@ -96,6 +101,8 @@ def create_response(message, status):
 @app.route('/api/login/', methods=['POST'])
 def login():
     request_data = request.json
+    if not request_data:
+        return jsonify({"message": "Phone cannot be blank."}), 400
 
     if "phone" not in request_data:
         return jsonify({"message": "Phone cannot be blank."}), 400
@@ -107,7 +114,12 @@ def login():
     if not phone:
         return jsonify({"message": "Phone cannot be null."}), 400
 
-    payload = [{"operationName":"OTPRequest","variables":{"msisdn":phone,"otpType":"112","mode":"sms","otpDigit":6},"query":"query OTPRequest($otpType: String!, $mode: String, $msisdn: String, $email: String, $otpDigit: Int, $ValidateToken: String, $UserIDEnc: String) {\n  OTPRequest(otpType: $otpType, mode: $mode, msisdn: $msisdn, email: $email, otpDigit: $otpDigit, ValidateToken: $ValidateToken, UserIDEnc: $UserIDEnc) {\n    success\n    message\n    errorMessage\n    sse_session_id\n    list_device_receiver\n    error_code\n    message_title\n    message_sub_title\n    message_img_link\n    __typename\n  }\n}\n"}]
+    payload = [
+        {
+            "operationName":"OTPRequest","variables":{"msisdn":phone,"otpType":"112","mode":"sms","otpDigit":6},
+            "query":"query OTPRequest($otpType: String!, $mode: String, $msisdn: String, $email: String, $otpDigit: Int, $ValidateToken: String, $UserIDEnc: String) {\n  OTPRequest(otpType: $otpType, mode: $mode, msisdn: $msisdn, email: $email, otpDigit: $otpDigit, ValidateToken: $ValidateToken, UserIDEnc: $UserIDEnc) {\n    success\n    message\n    errorMessage\n    sse_session_id\n    list_device_receiver\n    error_code\n    message_title\n    message_sub_title\n    message_img_link\n    __typename\n  }\n}\n"
+        }
+    ]
     json_data = json.dumps(payload)
 
     sess = requests.Session()
@@ -125,7 +137,7 @@ def login():
         response['message'] = datares[0]['data']['OTPRequest']['message']
         response['errorMessage'] = datares[0]['data']['OTPRequest']['errorMessage']
         response['success'] = datares[0]['data']['OTPRequest']['success']
-        response['cookies'] = cookies_new
+        response['cookies'] = str(cookies_new)
     else:
         response = datares
     print(response)
@@ -157,17 +169,12 @@ def send_otp():
     if not otp:
         return jsonify({"message": "OTP not found."}), 400
 
-    # cookies =  {
-    #     "_abck": "7BB9502BBA6876269D20424DB57EC722~-1~YAAQJOwZuBVP0ld8AQAALMuAngZhWRath1VmoCXhlbYDn3Kbiijoieuar28kfzAyRE47sQDoWQNliLtRYZU1a0fySuRZxZfkm69Y1QU5SOeuKu1Mwf9PceohOvkkTXpL3uA3pyxwqECm7//a46USviaNy2H2j5Ub3nOXrAQr84UGT83WyxLpoN+pIR39FgO3ePWZU4VeJv4heS/ueiCxj27HowP6/8YCzlMUatqgkjNamVg22Z546Nv75dX8RQ8oyN585C9HEnWZHVtMxRt9/mp0l+Jzgv9nYIDfO+ZcsXfvlu087JHSkaBdJymk0usThjmQ3hJobtSQfzOsUTosu2bsNHsNgZ8tnUXRgJbJu0UanfrQaBELkynWFIpqCh8=~-1~-1~-1",
-    #     "ak_bmsc": "6A695B6D78744FEF4FA030D28CDD1355~000000000000000000000000000000~YAAQJOwZuBZP0ld8AQAALMuAng0oe01AM63dvww+f4/QCjGNxG//R/uWMt723bDyy1QuErIeh6sontremIIs1h5GPCMoVNgMIgkStsHKSpCXozUZQnX6C+5rj2GLPK9eA7qw/ng/7n9eoVF4H78k9Q7+L9u61Nh11K9lUixvTlO+cI+0Do+Imvy3eEuADRB6Rs62wlcplZZjeHO5lLihl7mrkjCP7d87W5krAts2S7aXk89O2Osb83hPQRWDUHrnHr8r+p7yCljbEpjwpONTwdDto7X4QNfkpjo089xNYq3+swBjHqvqNslqJCbuy2ldlC2vbb4XyKQe9WmYQFiGKUncWQyhC0eYeT1cQ/keNmAOWLSE10DEjuGMu4a1ksdUOYY=",
-    #     "bm_sz": "9BD27047775C9BFA0A909DF8393650BD~YAAQJOwZuBdP0ld8AQAALMuAng1f71mTlPI0K4QLWsKCrDiI+zwPF2HznGSlFuS6l0NI41xXeMveuh6y1AT8QGuLxgNo6QuD/pjSBLnN4gPGGkz5Grsua/AQnUAkCAmiKh6/QX5ve8VYNNBZzTOgl9CUwOCj7gdd5GAYDHRdWtajUO58FkyHe5NGRrw2ZBACYNlzhPiuSsksQmACa0Fpp5q4hyJU5+GryXuz1t/xIHe6/T+H8Fq4OGQylJheK/eG5J0T17Kk6uLVhCzvb0EkuNoMi90VWPCBvw7JaV5emLiQDRN1L0M=~4403252~3224132",
-    #     "uid": "rBX7M2FwQbx58UG7AwNeAg=="
-    # }
     payload = [{"operationName":"OTPValidate","variables":{"msisdn":phone,"code":otp,"otpType":"112","mode":"sms"},"query":"query OTPValidate($msisdn: String, $code: String!, $otpType: String, $fpData: String, $getSL: String, $email: String, $mode: String, $ValidateToken: String, $UserIDEnc: String) {\n  OTPValidate(code: $code, otpType: $otpType, msisdn: $msisdn, fpData: $fpData, getSL: $getSL, email: $email, mode: $mode, ValidateToken: $ValidateToken, UserIDEnc: $UserIDEnc) {\n    success\n    message\n    errorMessage\n    validateToken\n    cookieList {\n      key\n      value\n      expire\n      __typename\n    }\n    __typename\n  }\n}\n"}]
     json_data = json.dumps(payload)
 
     sess = requests.Session()
-    for key, value in cookies.items():
+    cookies_dict = ast.literal_eval(cookies)
+    for key, value in cookies_dict.items():
         sess.cookies.set(key, value)
 
     res = sess.post(url, json_data, headers=headers)
@@ -179,7 +186,7 @@ def send_otp():
     # json_data = json.dumps(payload)
     # res = sess.post(url, json_data, headers=headers)
     
-    datares[0]['cookies'] = cookies_new
+    datares[0]['cookies'] = str(cookies_new)
     return jsonify(datares)
 
 
@@ -194,14 +201,46 @@ def account_list():
     json_data = json.dumps(payload)
 
     sess = requests.Session()
-    for key, value in cookies.items():
+    cookies_dict = ast.literal_eval(cookies)
+    for key, value in cookies_dict.items():
         sess.cookies.set(key, value)
 
     res = sess.post(url, json_data, headers=headers)
     cookies_new = sess.cookies.get_dict()
     datares = json.loads(res.text)
 
-    datares[0]['cookies'] = cookies_new
+    datares[0]['cookies'] = str(cookies_new)
+    return jsonify(datares)
+
+
+@app.route('/api/login_mutation/', methods=['POST'])
+def login_mutation():
+    request_data = request.json
+    phone = request_data.get('phone')
+    username = request_data.get('username')
+    password = request_data.get('password')
+    cookies = request_data.get('cookies')
+
+    string = base64.b64encode(password.encode('utf-8'))
+    pas_md5 = hashlib.md5(string).hexdigest() + "=Xg5k"
+
+    encoded = base64.b64encode(username.encode('utf-8'))
+    username_enc = encoded.decode() + "Xg5k"
+
+    payload = [{"operationName":"LoginMutation","variables":{"input":{"grant_type":"cGFzc3dvcmQ=Xg5k","password_type":"lpn","code":phone,"username":username_enc,"password":pas_md5,"supported":"true"}},"query":"mutation LoginMutation($input: TokenRequest!) {\n  login_token(input: $input) {\n    access_token\n    refresh_token\n    token_type\n    sid\n    acc_sid\n    errors {\n      message\n      __typename\n    }\n    popup_error {\n      header\n      body\n      action\n      __typename\n    }\n    sq_check\n    cotp_url\n    uid\n    action\n    event_code\n    expires_in\n    __typename\n  }\n}\n"}]
+    json_data = json.dumps(payload)
+
+    cookies_dict = ast.literal_eval(cookies)
+
+    sess = requests.Session()
+    for key, value in cookies_dict.items():
+        sess.cookies.set(key, value)
+
+    res = sess.post(url, json_data, headers=headers)
+    cookies_new = sess.cookies.get_dict()
+    datares = json.loads(res.text)
+
+    datares[0]['cookies'] = str(cookies_new)
     return jsonify(datares)
 
 
@@ -209,6 +248,70 @@ def sleep_time(number):
     for i in range(number, 0, -1):
         print(f"{i}", end='\n', flush=True)
         time.sleep(1)
+
+
+@app.route('/api/new_way/', methods=['POST'])
+def new_way():
+    new_url = "https://accounts.tokopedia.com/login"
+    request_data = request.json
+    phone = request_data.get('phone')
+    driver = check_chrome_driver()
+    driver.get(new_url)
+    sleep_time(3)
+    driver.find_element_by_id("email").send_keys(phone + Keys.ENTER)
+    sleep_time(3)
+    driver.find_element_by_id("cotp__method--sms").click()
+    response = {
+        "url": driver.current_url
+    }
+    driver.quit()
+    return jsonify(response)
+
+
+@app.route('/api/new_otp/', methods=['POST'])
+def new_otp():
+    request_data = request.json
+    otp = request_data.get('otp')
+    url = request_data.get('url')
+    email = request_data.get('email')
+    driver = check_chrome_driver()
+    driver.get(url)
+    sleep_time(3)
+    driver.find_element_by_id("cotp__method--sms").click()
+    sleep_time(3)
+    for index, number in enumerate(otp, start=1):
+        driver.find_element_by_id(f"otp-number-input-{index}").send_keys(number)
+    sleep_time(3)
+    email_choices = driver.find_elements_by_xpath("//p[@class='m-0']")
+    if email_choices and email:
+        selected_el = [e for e in email_choices if e.text == email]
+        selected_el[0].click()
+    driver.get(web_url + "/order-list")
+    sleep_time(3)
+    pickle.dump( driver.get_cookies(), open("cookies.pkl","wb"))
+    response = {
+        "message": "Successfully login"
+    }
+    driver.quit()
+    return jsonify(response)
+
+
+@app.route('/api/new_transactions/', methods=['POST'])
+def new_transactions():
+    cookies = pickle.load(open("cookies.pkl", "rb"))
+    sess = requests.Session()
+    for cookie in cookies:
+        print(cookie['name'], cookie['value'])
+        sess.cookies.set(cookie['name'], cookie['value'])
+
+    payload = [{"operationName":"GetOrderHistory","variables":{"VerticalCategory":"","Status":"","SearchableText":"","CreateTimeStart":"2021-10-01","CreateTimeEnd":"2021-10-11","Page":1,"Limit":10},"query":"query GetOrderHistory($VerticalCategory: String!, $Status: String!, $SearchableText: String!, $CreateTimeStart: String!, $CreateTimeEnd: String!, $Page: Int!, $Limit: Int!) {\n  uohOrders(input: {UUID: \"\", VerticalID: \"\", VerticalCategory: $VerticalCategory, Status: $Status, SearchableText: $SearchableText, CreateTime: \"\", CreateTimeStart: $CreateTimeStart, CreateTimeEnd: $CreateTimeEnd, Page: $Page, Limit: $Limit, SortBy: \"\", IsSortAsc: false}) {\n    orders {\n      orderUUID\n      verticalID\n      verticalCategory\n      userID\n      status\n      verticalStatus\n      searchableText\n      metadata {\n        upstream\n        verticalLogo\n        verticalLabel\n        paymentDate\n        paymentDateStr\n        queryParams\n        listProducts\n        detailURL {\n          webURL\n          webTypeLink\n          __typename\n        }\n        status {\n          label\n          textColor\n          bgColor\n          __typename\n        }\n        products {\n          title\n          imageURL\n          inline1 {\n            label\n            textColor\n            bgColor\n            __typename\n          }\n          inline2 {\n            label\n            textColor\n            bgColor\n            __typename\n          }\n          __typename\n        }\n        otherInfo {\n          actionType\n          appURL\n          webURL\n          label\n          textColor\n          bgColor\n          __typename\n        }\n        totalPrice {\n          value\n          label\n          textColor\n          bgColor\n          __typename\n        }\n        tickers {\n          action {\n            actionType\n            appURL\n            webURL\n            label\n            textColor\n            bgColor\n            __typename\n          }\n          title\n          text\n          type\n          isFull\n          __typename\n        }\n        buttons {\n          Label\n          variantColor\n          type\n          actionType\n          appURL\n          webURL\n          __typename\n        }\n        dotMenus {\n          actionType\n          appURL\n          webURL\n          label\n          textColor\n          bgColor\n          __typename\n        }\n        __typename\n      }\n      createTime\n      createBy\n      updateTime\n      updateBy\n      __typename\n    }\n    totalOrders\n    filtersV2 {\n      label\n      value\n      isPrimary\n      __typename\n    }\n    categories {\n      value\n      label\n      __typename\n    }\n    dateLimit\n    tickers {\n      action {\n        actionType\n        appURL\n        webURL\n        label\n        textColor\n        bgColor\n        __typename\n      }\n      title\n      text\n      type\n      isFull\n      __typename\n    }\n    __typename\n  }\n}\n"}]
+    json_data = json.dumps(payload)
+    gql_url = "https://gql.tokopedia.com/"
+    print("here")
+    res = sess.post(gql_url, json_data, headers=headers)
+    datares = json.loads(res.text)
+    print(datares)
+    return jsonify(datares)
 
 
 @app.route('/api/get_transactions/', methods=['POST'])
