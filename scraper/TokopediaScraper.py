@@ -191,9 +191,10 @@ class TokopediaScraper:
         return f"https://accounts.tokopedia.com/lpn/users?encoded={phone_enc}&client_id=&redirect_uri=&state=&validate_token={validate_token}"
 
     def login_with_email(self, driver, email, login_url, phone):
+        base_url = "http://tokopedia.com"
+        driver.get(base_url)
         driver.get(login_url)
-        sleep_time(20)
-
+        sleep_time(2)
         email_choices = driver.find_elements_by_xpath("//p[@class='m-0']")
         driver.get_screenshot_as_file("screenshot4.png")
         if email_choices and email:
