@@ -192,22 +192,22 @@ class TokopediaScraper:
 
     def login_with_email(self, driver, email, login_url, phone):
         driver.get(login_url)
-        sleep_time(300)
+        sleep_time(20)
 
         email_choices = driver.find_elements_by_xpath("//p[@class='m-0']")
         driver.get_screenshot_as_file("screenshot4.png")
         if email_choices and email:
             selected_el = [e for e in email_choices if e.text == email]
             selected_el[0].click()
+        web_url = "http://tokopedia.com"
+        driver.get(web_url + "/order-list")
+        sleep_time(2)
         sess = requests.Session()
         for cookie in driver.get_cookies():
             sess.cookies.set(cookie['name'], cookie['value'])
         json_data = json.dumps(self.account_payload())
         res = sess.post(self.gql_url, json_data, headers=self.headers)
         datares = json.loads(res.text)
-        web_url = "http://tokopedia.com"
-        driver.get(web_url + "/order-list")
-        sleep_time(2)
         return datares, True
 
     def account_payload(self):
