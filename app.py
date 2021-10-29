@@ -138,13 +138,17 @@ def login():
     phone = request_data.get('phone')
     validate_token = request_data.get('validate_token')
     email = request_data.get('email')
-
     response = {}
+    if not phone or not validate_token or not email:
+        response['message'] = "phone, validate_token, email cannot be null."
+        response['status'] = 'Failed'
+        return jsonify(response), 400
+
     driver, message = initialize_webdriver(app.root_path)
     if not driver:
-        response['message'] = message
+        response['message'] = str(message)
         response['status'] = 'Failed'
-        return jsonify(response)
+        return jsonify(response), 500
 
     tokped = TokopediaScraper()
     login_url = tokped.create_login_url(validate_token, phone)
@@ -154,11 +158,11 @@ def login():
     except Exception as e:
         response['message'] = str(e)
         response['status'] = 'Failed'
-        return jsonify(response)
+        return jsonify(response), 500
     if not ok:
         response['message'] = str(login_data)
         response['status'] = 'Failed'
-        return jsonify(response)
+        return jsonify(response), 500
 
     cookies = driver.get_cookies()
     response = {

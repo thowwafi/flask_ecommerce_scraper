@@ -156,36 +156,6 @@ class TokopediaScraper:
         data_res_accounts = json.loads(res_accounts.text)
         return data_res_accounts, validate_token
 
-        # driver.get(self.url)
-        # driver.get_screenshot_as_file("screenshot1.png")
-        # sleep_time(2)
-        # driver.find_element_by_id("cotp__method--sms").click()
-        # driver.get_screenshot_as_file("screenshot2.png")
-        # sleep_time(2)
-        # for index, number in enumerate(otp, start=1):
-        #     driver.find_element_by_id(f"otp-number-input-{index}").send_keys(number)
-        # driver.get_screenshot_as_file("screenshot3.png")
-        # sleep_time(5)
-        # driver.get_screenshot_as_file("screenshot3a.png")
-        # email_choices = driver.find_elements_by_xpath("//p[@class='m-0']")
-        # driver.get_screenshot_as_file("screenshot4.png")
-        # if email_choices and email:
-        #     selected_el = [e for e in email_choices if e.text == email]
-        #     selected_el[0].click()
-        # sleep_time(2)
-        # driver.get_screenshot_as_file("screenshot5.png")
-        # sess = requests.Session()
-        # for cookie in driver.get_cookies():
-        #     sess.cookies.set(cookie['name'], cookie['value'])
-        # json_data = json.dumps(self.account_payload())
-        # res = sess.post(self.gql_url, json_data, headers=self.headers)
-        # datares = json.loads(res.text)
-
-        # web_url = "http://tokopedia.com"
-        # driver.get(web_url + "/order-list")
-        # sleep_time(2)
-        # return datares
-
     def create_login_url(self, validate_token, phone):
         phone_enc = self.encode_phone(phone)
         return f"https://accounts.tokopedia.com/lpn/users?encoded={phone_enc}&client_id=&redirect_uri=&state=&validate_token={validate_token}"
@@ -193,15 +163,20 @@ class TokopediaScraper:
     def login_with_email(self, driver, email, login_url, phone):
         base_url = "http://tokopedia.com"
         driver.get(base_url)
+        driver.get_screenshot_as_file("screenshot4.png")
         driver.get(login_url)
+        driver.get_screenshot_as_file("screenshot5.png")
         sleep_time(2)
         email_choices = driver.find_elements_by_xpath("//p[@class='m-0']")
-        driver.get_screenshot_as_file("screenshot4.png")
         if email_choices and email:
+            print(email)
             selected_el = [e for e in email_choices if e.text == email]
+            print(selected_el)
             selected_el[0].click()
-        web_url = "http://tokopedia.com"
-        driver.get(web_url + "/order-list")
+        sleep_time(2)
+        driver.get_screenshot_as_file("screenshot6.png")
+        driver.get(base_url + "/order-list")
+        driver.get_screenshot_as_file("screenshot7.png")
         sleep_time(2)
         sess = requests.Session()
         for cookie in driver.get_cookies():

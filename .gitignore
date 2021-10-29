@@ -3,3 +3,4 @@ venv
 __pychache__
 **.pyc
 cookies/
+**.log
