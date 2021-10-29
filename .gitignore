@@ -2,3 +2,4 @@ venv
 .vscode
 __pychache__
 **.pyc
+cookies/

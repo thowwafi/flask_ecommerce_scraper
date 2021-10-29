@@ -10,12 +10,10 @@ from pprint import pprint
 import pickle
 from flask.wrappers import Response
 import requests
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.keys import Keys
 import time
 from scraper.TokopediaScraper import TokopediaScraper
-from utils.utils import sleep_time, makeDirIfNotExists
+from utils.utils import sleep_time, makeDirIfNotExists, initialize_webdriver
 
 
 app = Flask(__name__)
@@ -82,16 +80,7 @@ def hello_world():
     return "Hello World"
 
 
-def initialize_webdriver():
-    CHROMEDRIVER_PATH = os.path.join(app.root_path, "chromedriver")
-    try:
-        options = Options()
-        # options.add_argument("--headless")
-        return webdriver.Chrome(executable_path=CHROMEDRIVER_PATH, options=options), "Ok"
-    except OSError:
-        return None, "Chrome webdriver not matching with OS"
-    except Exception as e:
-        return None, e
+
 
 
 def create_response(message, status):
@@ -101,8 +90,8 @@ def create_response(message, status):
     })
 
 
-@app.route('/api/login/', methods=['POST'])
-def login():
+@app.route('/api/request_otp/', methods=['POST'])
+def request_otp():
     request_data = request.json
     if not request_data:
         return jsonify({"message": "Phone cannot be blank."}), 400
@@ -140,23 +129,22 @@ def login():
         response['message'] = datares[0]['data']['OTPRequest']['message']
         response['errorMessage'] = datares[0]['data']['OTPRequest']['errorMessage']
         response['success'] = datares[0]['data']['OTPRequest']['success']
-        response['cookies'] = str(cookies_new)
     else:
         response = datares
     print(response)
     return jsonify(response)
 
 
-@app.route('/api/send_otp_1/', methods=['POST'])
-def send_otp_1():
+@app.route('/api/send_otp/', methods=['POST'])
+def send_otp():
     request_data = request.json
 
     if "phone" not in request_data:
         return jsonify({"message": "Phone cannot be blank."}), 400
     if "otp" not in request_data:
         return jsonify({"message": "OTP cannot be blank."}), 400
-    if "cookies" not in request_data:
-        return jsonify({"message": "Cookies cannot be blank."}), 400
+    # if "cookies" not in request_data:
+    #     return jsonify({"message": "Cookies cannot be blank."}), 400
 
     phone = request_data.get('phone')
     if phone is None:
@@ -167,8 +155,8 @@ def send_otp_1():
 
     otp = request_data.get('otp')
     cookies = request_data.get('cookies')
-    if not cookies:
-        return jsonify({"message": "Cookies not found."}), 400
+    # if not cookies:
+    #     return jsonify({"message": "Cookies not found."}), 400
     if not otp:
         return jsonify({"message": "OTP not found."}), 400
 
@@ -176,9 +164,9 @@ def send_otp_1():
     json_data = json.dumps(payload)
 
     sess = requests.Session()
-    cookies_dict = ast.literal_eval(cookies)
-    for key, value in cookies_dict.items():
-        sess.cookies.set(key, value)
+    # cookies_dict = ast.literal_eval(cookies)
+    # for key, value in cookies_dict.items():
+    #     sess.cookies.set(key, value)
 
     res = sess.post(url, json_data, headers=headers)
     cookies_new = sess.cookies.get_dict()
@@ -189,7 +177,6 @@ def send_otp_1():
     # json_data = json.dumps(payload)
     # res = sess.post(url, json_data, headers=headers)
     
-    datares[0]['cookies'] = str(cookies_new)
     return jsonify(datares)
 
 
@@ -204,16 +191,73 @@ def account_list():
     json_data = json.dumps(payload)
 
     sess = requests.Session()
-    cookies_dict = ast.literal_eval(cookies)
-    for key, value in cookies_dict.items():
-        sess.cookies.set(key, value)
+    # cookies_dict = ast.literal_eval(cookies)
+    # for key, value in cookies_dict.items():
+    #     sess.cookies.set(key, value)
 
     res = sess.post(url, json_data, headers=headers)
     cookies_new = sess.cookies.get_dict()
     datares = json.loads(res.text)
 
-    datares[0]['cookies'] = str(cookies_new)
     return jsonify(datares)
+
+
+@app.route('/api/login/', methods=['POST'])
+def login():
+    request_data = request.json
+    phone = request_data.get('phone')
+    validate_token = request_data.get('validate_token')
+    email = request_data.get('email')
+
+    response = {}
+    driver, message = initialize_webdriver(app.root_path)
+    if not driver:
+        response['message'] = message
+        response['status'] = 'Failed'
+        return jsonify(response)
+
+    tokped = TokopediaScraper()
+    login_url = tokped.create_login_url(validate_token, phone)
+
+    try:
+        login_data = tokped.login_with_email(driver, email, login_url)
+    except Exception as e:
+        response['message'] = e
+        response['status'] = 'Failed'
+        return jsonify(response)
+
+    cookies = driver.get_cookies()
+    response = {
+        "message": "Successfully login",
+        "session_id": str(cookies),
+        "data": login_data
+    }
+
+    return jsonify(response)
+
+
+@app.route('/api/transaction_list/', methods=['POST'])
+def transaction_list():
+    request_data = request.json
+    session_token = request_data.get('session_token')
+    start_at = request_data.get('start_at')
+    end_at = request_data.get('end_at')
+
+    response = {}
+    if not session_token or not start_at or not end_at:
+        response['status'] = 'Failed'
+        response['message'] = 'Request body needs session_token, start_at, and end_at value'
+        return jsonify(response), 400
+
+    tokped = TokopediaScraper()
+    session = tokped.load_session(session_token)
+    data = tokped.get_order_history(session, start_at, end_at)
+
+    response['status'] = 'Success.'
+    response['message'] = 'Successfully retrieve transactions data.'
+    response['data'] = data
+
+    return jsonify(response)
 
 
 @app.route('/api/login_mutation/', methods=['POST'])
@@ -253,8 +297,8 @@ def sleep_time(number):
         time.sleep(1)
 
 
-@app.route('/api/request_otp/', methods=['POST'])
-def request_otp():
+@app.route('/api/request_otp1/', methods=['POST'])
+def request_otp1():
     request_data = request.json
     phone = request_data.get('phone')
 
@@ -266,16 +310,20 @@ def request_otp():
 
     tokped = TokopediaScraper(phone=phone)
 
-    driver, message = initialize_webdriver()
+    driver, message = initialize_webdriver(app.root_path)
     if not driver:
         response['message'] = str(message)
         response['status'] = 'Failed'
         return jsonify(response)
 
     try:
-        tokped.request_otp(driver)
+        is_ok, message = tokped.request_otp(driver)
     except Exception as e:
         response['message'] = e
+        response['status'] = 'Failed'
+        return jsonify(response)
+    if not is_ok:
+        response['message'] = message
         response['status'] = 'Failed'
         return jsonify(response)
 
@@ -284,8 +332,8 @@ def request_otp():
     return jsonify(response)
 
 
-@app.route('/api/send_otp/', methods=['POST'])
-def send_otp():
+@app.route('/api/send_otp1/', methods=['POST'])
+def send_otp1():
     request_data = request.json
     otp = request_data.get('otp')
     phone = request_data.get('phone')
@@ -299,7 +347,7 @@ def send_otp():
 
     tokped = TokopediaScraper(phone=phone)
 
-    driver, message = initialize_webdriver()
+    driver, message = initialize_webdriver(app.root_path)
     if not driver:
         response['message'] = message
         response['status'] = 'Failed'
@@ -324,33 +372,6 @@ def send_otp():
     return jsonify(response)
 
 
-@app.route('/api/transaction_list/', methods=['POST'])
-def transaction_list():
-    request_data = request.json
-    session_id = request_data.get('session_id')
-    start_at = request_data.get('start_at')
-    end_at = request_data.get('end_at')
-
-    response = {}
-    if not session_id or not start_at or not end_at:
-        response['status'] = 'Failed'
-        response['message'] = 'Request body needs session_id, start_at, and end_at value'
-        return jsonify(response), 400
-
-    root_path = app.root_path
-
-    tokped = TokopediaScraper()
-    cookies = tokped.load_session(session_id, root_path)
-    session = tokped.load_cookies(cookies)
-    data = tokped.get_order_history(session, start_at, end_at)
-
-    response['status'] = 'Success.'
-    response['message'] = 'Successfully retrieve transactions data.'
-    response['data'] = data
-
-    return jsonify(response)
-
-
 @app.route('/api/get_transactions/', methods=['POST'])
 def get_transactions():
     request_data = request.json
@@ -359,7 +380,7 @@ def get_transactions():
     end_at = request_data.get('end_at')
     if not phone or not start_at or not end_at:
         return jsonify({"message": "Phone/Start At/End At cannot be empty."}), 400
-    driver, message = initialize_webdriver()
+    driver, message = initialize_webdriver(app.root_path)
     driver.get(web_url)
     my_element = driver.find_element_by_xpath("//button[text()='Masuk']")
     my_element.click()

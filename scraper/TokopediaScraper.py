@@ -1,10 +1,15 @@
+import ast
 import base64
 from datetime import datetime
 import json
 import os
 import pickle
-import requests
 from utils.utils import sleep_time, makeDirIfNotExists
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
+from selenium.common.exceptions import TimeoutException
+import requests
 
 
 headers = {
@@ -34,18 +39,19 @@ headers = {
     "x-version": "f923518",
 }
 
+# 11e3b5f1908a4089b0fc31fa14abed8e
 
 class TokopediaScraper:
-    def __init__(self, phone=""):
-        self.phone = phone
-        self.encoded_phone = self.encode_phone()
-        self.url = self.get_url()
+    # def __init__(self, phone=""):
+    #     self.phone = phone
+    #     self.encoded_phone = self.encode_phone()
+    #     self.url = self.get_url()
 
-    def encode_phone(self):
+    def encode_phone(self, phone):
         """
         Encode phone number with base64
         """
-        encoded = base64.b64encode(self.phone.encode('utf-8'))
+        encoded = base64.b64encode(phone.encode('utf-8'))
         return encoded.decode()  # turn bytes to string
 
     def get_url(self):
@@ -58,30 +64,46 @@ class TokopediaScraper:
         """
         Send GET request to URL to get OTP
         """
+        # driver.execute_script(f"window.open('{self.url}', 'new_window')")
         driver.get(self.url)
+        driver.get_screenshot_as_file("screenshot.png")
+        # timeout = 5
+        # try:
+        #     # wait until element shows up
+        #     element_present = EC.presence_of_element_located((By.ID, 'cotp__method--sms'))
+        #     WebDriverWait(driver, timeout).until(element_present)
+        # except TimeoutException:
+        #     return False, "Timed out waiting for page to load"
         sleep_time(2)
         driver.find_element_by_id("cotp__method--sms").click()
         sleep_time(2)
         driver.quit()
+        return True, 'ok'
+        
+# https://accounts.tokopedia.com/lpn/users?encoded=MDgxMjcyNzA5MDAz&client_id=&redirect_uri=&state=&validate_token=7945da21c4f64217b502b094c6643e0e
 
     def send_otp(self, driver, otp, email):
         """
         Send OTP Number
         """
         driver.get(self.url)
+        driver.get_screenshot_as_file("screenshot1.png")
         sleep_time(2)
         driver.find_element_by_id("cotp__method--sms").click()
+        driver.get_screenshot_as_file("screenshot2.png")
         sleep_time(2)
         for index, number in enumerate(otp, start=1):
             driver.find_element_by_id(f"otp-number-input-{index}").send_keys(number)
-        sleep_time(2)
+        driver.get_screenshot_as_file("screenshot3.png")
+        sleep_time(5)
+        driver.get_screenshot_as_file("screenshot3a.png")
         email_choices = driver.find_elements_by_xpath("//p[@class='m-0']")
+        driver.get_screenshot_as_file("screenshot4.png")
         if email_choices and email:
             selected_el = [e for e in email_choices if e.text == email]
             selected_el[0].click()
         sleep_time(2)
-
-        gql_url = "https://gql.tokopedia.com/"
+        driver.get_screenshot_as_file("screenshot5.png")
         sess = requests.Session()
         for cookie in driver.get_cookies():
             sess.cookies.set(cookie['name'], cookie['value'])
@@ -94,6 +116,31 @@ class TokopediaScraper:
         driver.get(web_url + "/order-list")
         sleep_time(2)
         return datares
+
+    def create_login_url(self, validate_token, phone):
+        phone_enc = self.encode_phone(phone)
+        return f"https://accounts.tokopedia.com/lpn/users?encoded={phone_enc}&client_id=&redirect_uri=&state=&validate_token={validate_token}"
+
+    def login_with_email(self, driver, email, login_url):
+        driver.get(login_url)
+        email_choices = driver.find_elements_by_xpath("//p[@class='m-0']")
+        driver.get_screenshot_as_file("screenshot4.png")
+        if email_choices and email:
+            selected_el = [e for e in email_choices if e.text == email]
+            selected_el[0].click()
+        sleep_time(5)
+        sess = requests.Session()
+        for cookie in driver.get_cookies():
+            sess.cookies.set(cookie['name'], cookie['value'])
+        json_data = json.dumps(self.account_payload())
+        gql_url = "https://gql.tokopedia.com/"
+        res = sess.post(gql_url, json_data, headers=headers)
+        datares = json.loads(res.text)
+        web_url = "http://tokopedia.com"
+        driver.get(web_url + "/order-list")
+        sleep_time(2)
+        return datares
+
 
     def account_payload(self):
         return [{"operationName":"Account","variables":{},"query":"""query Account {
@@ -149,7 +196,7 @@ class TokopediaScraper:
         pickle.dump(driver.get_cookies(), open(cookie_file, "wb"))
         return session_id
 
-    def load_session(self, session_id, root_path):
+    def load_session1(self, session_id, root_path):
         """
         Load saved cookies by session_id
         """
@@ -157,10 +204,11 @@ class TokopediaScraper:
         cookie_file = os.path.join(cookies_folder, f"cookies_{session_id}.pkl")
         return pickle.load(open(cookie_file, "rb"))
 
-    def load_cookies(self, cookies):
+    def load_session(self, session_token):
         """
         Load cookies into requests session
         """
+        cookies = ast.literal_eval(session_token)
         sess = requests.Session()
         for cookie in cookies:
             print(cookie['name'], cookie['value'])
@@ -322,3 +370,16 @@ class TokopediaScraper:
                 """
             }
         ]
+
+# dibutuhkan untuk setelah otp/login :
+# - account _holder
+# - account number (bisa no rekening jika bank, no hp untuk e-wallet biasanya)
+# untuk retrieval :
+# balance dari banks/ewalletnya
+# list of transaksi dimana setiap transaksi memiliki :
+# value (jumlah income/outcome)
+# nama/judul (nama transaksi spr transfer ke x, pembayaran ke x)
+# tanggal transaksi
+# tipe transkasi ("kredit/debit")
+# status transaksi(success or pending or etc)
+
