@@ -3,20 +3,19 @@ import base64
 from datetime import datetime
 from flask import Flask
 from flask import request, jsonify
-from flask import Response
 import hashlib
 import json
 import os
 from pprint import pprint
 import pickle
+from flask.wrappers import Response
 import requests
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.keys import Keys
-from seleniumrequests import Chrome
-import sys
 import time
-from .TokopediaScraper import TokopediaScraper
+from scraper.TokopediaScraper import TokopediaScraper
+from utils.utils import sleep_time, makeDirIfNotExists
 
 
 app = Flask(__name__)
@@ -82,6 +81,7 @@ def hello_world():
     print(app.root_path)
     return "Hello World"
 
+
 def initialize_webdriver():
     CHROMEDRIVER_PATH = os.path.join(app.root_path, "chromedriver")
     try:
@@ -92,6 +92,7 @@ def initialize_webdriver():
         return None, "Chrome webdriver not matching with OS"
     except Exception as e:
         return None, e
+
 
 def create_response(message, status):
     return jsonify({
@@ -146,8 +147,8 @@ def login():
     return jsonify(response)
 
 
-@app.route('/api/send_otp/', methods=['POST'])
-def send_otp():
+@app.route('/api/send_otp_1/', methods=['POST'])
+def send_otp_1():
     request_data = request.json
 
     if "phone" not in request_data:
@@ -257,12 +258,17 @@ def request_otp():
     request_data = request.json
     phone = request_data.get('phone')
 
+    response = {}
+    if not phone:
+        response['status'] = 'Failed'
+        response['message'] = 'Request body needs phone number.'
+        return jsonify(response), 400
+
     tokped = TokopediaScraper(phone=phone)
 
-    response = {}
     driver, message = initialize_webdriver()
     if not driver:
-        response['message'] = message
+        response['message'] = str(message)
         response['status'] = 'Failed'
         return jsonify(response)
 
@@ -275,7 +281,6 @@ def request_otp():
 
     response['message'] = "SMS has been sent."
     response['status'] = "Success"
-    response['otp_token'] = tokped.encoded_phone
     return jsonify(response)
 
 
@@ -283,52 +288,67 @@ def request_otp():
 def send_otp():
     request_data = request.json
     otp = request_data.get('otp')
-    otp_token = request_data.get('otp_token')
+    phone = request_data.get('phone')
     email = request_data.get('email')
 
-    
+    response = {}
+    if not otp or not phone:
+        response['status'] = 'Failed'
+        response['message'] = 'Request body needs otp, and phone.'
+        return jsonify(response), 400
+
+    tokped = TokopediaScraper(phone=phone)
+
     driver, message = initialize_webdriver()
-    driver.get(url)
-    sleep_time(3)
-    driver.find_element_by_id("cotp__method--sms").click()
-    sleep_time(3)
-    for index, number in enumerate(otp, start=1):
-        driver.find_element_by_id(f"otp-number-input-{index}").send_keys(number)
-    sleep_time(3)
-    email_choices = driver.find_elements_by_xpath("//p[@class='m-0']")
-    if email_choices and email:
-        selected_el = [e for e in email_choices if e.text == email]
-        selected_el[0].click()
-    driver.get(web_url + "/order-list")
-    sleep_time(3)
-    session_id = datetime.now().strftime("%Y%m%d%H%M%S")
-    cookies_folder = os.path.join(app.instance_path, 'cookies')
-    if not os.path.exists(cookies_folder):
-        os.makedirs(cookies_folder)
-    cookie_file = os.path.join(cookies_folder, f"cookies_{session_id}.pkl")
-    pickle.dump(driver.get_cookies(), open(cookie_file, "wb"))
+    if not driver:
+        response['message'] = message
+        response['status'] = 'Failed'
+        return jsonify(response)
+
+    try:
+        login_data = tokped.send_otp(driver, otp, email)
+    except Exception as e:
+        response['message'] = e
+        response['status'] = 'Failed'
+        return jsonify(response)
+
+    root_path = app.root_path
+    session_id = tokped.save_session(root_path, driver)
+
     response = {
         "message": "Successfully login",
-        "session_id": session_id
+        "session_id": session_id,
+        "data": login_data
     }
     driver.quit()
     return jsonify(response)
 
 
-@app.route('/api/new_transactions/', methods=['POST'])
-def new_transactions():
-    cookies = pickle.load(open("cookies.pkl", "rb"))
-    sess = requests.Session()
-    for cookie in cookies:
-        print(cookie['name'], cookie['value'])
-        sess.cookies.set(cookie['name'], cookie['value'])
+@app.route('/api/transaction_list/', methods=['POST'])
+def transaction_list():
+    request_data = request.json
+    session_id = request_data.get('session_id')
+    start_at = request_data.get('start_at')
+    end_at = request_data.get('end_at')
 
-    payload = [{"operationName":"GetOrderHistory","variables":{"VerticalCategory":"","Status":"","SearchableText":"","CreateTimeStart":"2021-10-01","CreateTimeEnd":"2021-10-11","Page":1,"Limit":10},"query":"query GetOrderHistory($VerticalCategory: String!, $Status: String!, $SearchableText: String!, $CreateTimeStart: String!, $CreateTimeEnd: String!, $Page: Int!, $Limit: Int!) {\n  uohOrders(input: {UUID: \"\", VerticalID: \"\", VerticalCategory: $VerticalCategory, Status: $Status, SearchableText: $SearchableText, CreateTime: \"\", CreateTimeStart: $CreateTimeStart, CreateTimeEnd: $CreateTimeEnd, Page: $Page, Limit: $Limit, SortBy: \"\", IsSortAsc: false}) {\n    orders {\n      orderUUID\n      verticalID\n      verticalCategory\n      userID\n      status\n      verticalStatus\n      searchableText\n      metadata {\n        upstream\n        verticalLogo\n        verticalLabel\n        paymentDate\n        paymentDateStr\n        queryParams\n        listProducts\n        detailURL {\n          webURL\n          webTypeLink\n          __typename\n        }\n        status {\n          label\n          textColor\n          bgColor\n          __typename\n        }\n        products {\n          title\n          imageURL\n          inline1 {\n            label\n            textColor\n            bgColor\n            __typename\n          }\n          inline2 {\n            label\n            textColor\n            bgColor\n            __typename\n          }\n          __typename\n        }\n        otherInfo {\n          actionType\n          appURL\n          webURL\n          label\n          textColor\n          bgColor\n          __typename\n        }\n        totalPrice {\n          value\n          label\n          textColor\n          bgColor\n          __typename\n        }\n        tickers {\n          action {\n            actionType\n            appURL\n            webURL\n            label\n            textColor\n            bgColor\n            __typename\n          }\n          title\n          text\n          type\n          isFull\n          __typename\n        }\n        buttons {\n          Label\n          variantColor\n          type\n          actionType\n          appURL\n          webURL\n          __typename\n        }\n        dotMenus {\n          actionType\n          appURL\n          webURL\n          label\n          textColor\n          bgColor\n          __typename\n        }\n        __typename\n      }\n      createTime\n      createBy\n      updateTime\n      updateBy\n      __typename\n    }\n    totalOrders\n    filtersV2 {\n      label\n      value\n      isPrimary\n      __typename\n    }\n    categories {\n      value\n      label\n      __typename\n    }\n    dateLimit\n    tickers {\n      action {\n        actionType\n        appURL\n        webURL\n        label\n        textColor\n        bgColor\n        __typename\n      }\n      title\n      text\n      type\n      isFull\n      __typename\n    }\n    __typename\n  }\n}\n"}]
-    json_data = json.dumps(payload)
-    gql_url = "https://gql.tokopedia.com/"
-    res = sess.post(gql_url, json_data, headers=headers)
-    datares = json.loads(res.text)
-    return jsonify(datares)
+    response = {}
+    if not session_id or not start_at or not end_at:
+        response['status'] = 'Failed'
+        response['message'] = 'Request body needs session_id, start_at, and end_at value'
+        return jsonify(response), 400
+
+    root_path = app.root_path
+
+    tokped = TokopediaScraper()
+    cookies = tokped.load_session(session_id, root_path)
+    session = tokped.load_cookies(cookies)
+    data = tokped.get_order_history(session, start_at, end_at)
+
+    response['status'] = 'Success.'
+    response['message'] = 'Successfully retrieve transactions data.'
+    response['data'] = data
+
+    return jsonify(response)
 
 
 @app.route('/api/get_transactions/', methods=['POST'])
