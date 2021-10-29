@@ -1,13 +1,12 @@
 import ast
 import base64
 from datetime import datetime
+from os import error
 from flask import Flask
 from flask import request, jsonify
 import hashlib
 import json
-import os
 from pprint import pprint
-import pickle
 from flask.wrappers import Response
 import requests
 from selenium.webdriver.common.keys import Keys
@@ -45,32 +44,6 @@ headers = {
     "x-tkpd-lite-service": "zeus",
     "x-version": "f923518",
 }
-headers2 = {
-    "authority": "gql.tokopedia.com",
-    "method": "POST",
-    "path": "/",
-    "scheme": "https",
-    "accept": "*/*",
-    "accept-encoding": "gzip, deflate, br",
-    "accept-language": "en-US,en;q=0.9,id;q=0.8",
-    "cache-control": "no-cache",
-    "content-length": "656",
-    "content-type": "application/json",
-    "origin": "https://www.tokopedia.com",
-    "pragma": "no-cache",
-    "referer": "https://www.tokopedia.com/",
-    "sec-ch-ua-mobile": "?0",
-    "sec-ch-ua-platform": "macOS",
-    "sec-fetch-dest": "empty",
-    "sec-fetch-mode": "cors",
-    "sec-fetch-site": "same-site",
-    "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.81 Safari/537.36",
-    "x-device": "desktop",
-    "x-source": "tokopedia-lite",
-    "x-tkpd-akamai": "otp",
-    "x-tkpd-lite-service": "zeus",
-    "x-version": "f923518"
-}
 web_url = "http://tokopedia.com"
 url = "https://gql.tokopedia.com/"
 
@@ -80,126 +53,83 @@ def hello_world():
     return "Hello World"
 
 
-
-
-
-def create_response(message, status):
-    return jsonify({
-        "message": message,
-        "status": status
-    })
-
-
 @app.route('/api/request_otp/', methods=['POST'])
 def request_otp():
+    """
+    @Body: 
+    {
+        "phone": "080989999"
+    }
+    """
     request_data = request.json
-    if not request_data:
-        return jsonify({"message": "Phone cannot be blank."}), 400
-
-    if "phone" not in request_data:
-        return jsonify({"message": "Phone cannot be blank."}), 400
-
     phone = request_data.get('phone')
-    if phone is None:
-        return jsonify({"message": "Phone cannot be null."}), 400
-    phone = phone.strip()
-    if not phone:
-        return jsonify({"message": "Phone cannot be null."}), 400
-
-    payload = [
-        {
-            "operationName":"OTPRequest","variables":{"msisdn":phone,"otpType":"112","mode":"sms","otpDigit":6},
-            "query":"query OTPRequest($otpType: String!, $mode: String, $msisdn: String, $email: String, $otpDigit: Int, $ValidateToken: String, $UserIDEnc: String) {\n  OTPRequest(otpType: $otpType, mode: $mode, msisdn: $msisdn, email: $email, otpDigit: $otpDigit, ValidateToken: $ValidateToken, UserIDEnc: $UserIDEnc) {\n    success\n    message\n    errorMessage\n    sse_session_id\n    list_device_receiver\n    error_code\n    message_title\n    message_sub_title\n    message_img_link\n    __typename\n  }\n}\n"
-        }
-    ]
-    json_data = json.dumps(payload)
-
-    sess = requests.Session()
-    res = sess.get(web_url, headers=headers)
-    cookies_ = sess.cookies.get_dict()
-    for key, value in cookies_.items():
-        sess.cookies.set(key, value)
-    pprint(headers)
-    res = sess.post(url, json_data, headers=headers)
-    cookies_new = sess.cookies.get_dict()
-    datares = json.loads(res.text)
-    print("datares", datares)
     response = {}
-    if isinstance(datares, list):
-        response['message'] = datares[0]['data']['OTPRequest']['message']
-        response['errorMessage'] = datares[0]['data']['OTPRequest']['errorMessage']
-        response['success'] = datares[0]['data']['OTPRequest']['success']
+    if not phone:
+        response['status'] = 'Failed'
+        response['message'] = 'Phone cannot be null'
+        return jsonify(response), 400
+
+    tokped = TokopediaScraper()
+    try:
+        data_res = tokped.request_otp(phone)
+    except Exception as e:
+        response['status'] = 'Failed'
+        response['message'] = str(e)
+        return jsonify(response), 500
+
+    if isinstance(data_res, list):
+        is_success = data_res[0]['data']['OTPRequest']['success']
+        if is_success:
+            response['status'] = 'Success'
+            response['message'] = data_res[0]['data']['OTPRequest']['message']
+        else:
+            response['status'] = 'Failed'
+            response['message'] = data_res[0]['data']['OTPRequest']['errorMessage']
+        response['success'] = is_success
     else:
-        response = datares
-    print(response)
+        response = data_res
+
     return jsonify(response)
 
 
 @app.route('/api/send_otp/', methods=['POST'])
 def send_otp():
+    """
+    @Body:
+    {
+        "phone": "080989999",
+        "otp": "627091"
+    }
+    """
     request_data = request.json
-
-    if "phone" not in request_data:
-        return jsonify({"message": "Phone cannot be blank."}), 400
-    if "otp" not in request_data:
-        return jsonify({"message": "OTP cannot be blank."}), 400
-    # if "cookies" not in request_data:
-    #     return jsonify({"message": "Cookies cannot be blank."}), 400
-
     phone = request_data.get('phone')
-    if phone is None:
-        return jsonify({"message": "Phone cannot be null."}), 400
-    phone = phone.strip()
-    if not phone:
-        return jsonify({"message": "Phone cannot be null."}), 400
-
     otp = request_data.get('otp')
-    cookies = request_data.get('cookies')
-    # if not cookies:
-    #     return jsonify({"message": "Cookies not found."}), 400
-    if not otp:
-        return jsonify({"message": "OTP not found."}), 400
 
-    payload = [{"operationName":"OTPValidate","variables":{"msisdn":phone,"code":otp,"otpType":"112","mode":"sms"},"query":"query OTPValidate($msisdn: String, $code: String!, $otpType: String, $fpData: String, $getSL: String, $email: String, $mode: String, $ValidateToken: String, $UserIDEnc: String) {\n  OTPValidate(code: $code, otpType: $otpType, msisdn: $msisdn, fpData: $fpData, getSL: $getSL, email: $email, mode: $mode, ValidateToken: $ValidateToken, UserIDEnc: $UserIDEnc) {\n    success\n    message\n    errorMessage\n    validateToken\n    cookieList {\n      key\n      value\n      expire\n      __typename\n    }\n    __typename\n  }\n}\n"}]
-    json_data = json.dumps(payload)
+    response = {}
+    if not phone or not otp:
+        response['status'] = 'Failed'
+        response['message'] = 'Phone/OTP cannot be null'
+        return jsonify(response), 400
 
-    sess = requests.Session()
-    # cookies_dict = ast.literal_eval(cookies)
-    # for key, value in cookies_dict.items():
-    #     sess.cookies.set(key, value)
+    tokped = TokopediaScraper()
+    try:
+        data_res, validate_token = tokped.send_otp(phone, otp)
+    except Exception as e:
+        response['status'] = 'Failed'
+        response['message'] = str(e)
+        return jsonify(response), 500
+    errors = data_res[0]['data']['accountsGetAccountsList']['errors']
+    if errors:
+        response['status'] = "Failed"
+        response['message'] = errors[0]['message']
+        return jsonify(response), 500
 
-    res = sess.post(url, json_data, headers=headers)
-    cookies_new = sess.cookies.get_dict()
-    datares = json.loads(res.text)
-    print("datares", datares)
-
-    # payload = [{"operationName":"isAuthenticatedQuery","variables":{},"query":"query isAuthenticatedQuery {\n  isAuthenticated\n}\n"}]
-    # json_data = json.dumps(payload)
-    # res = sess.post(url, json_data, headers=headers)
+    response["status"] = "Success"
+    response["message"] = ""
+    response["validate_token"] = validate_token
+    response["user_data"] = data_res[0]['data']['accountsGetAccountsList']
     
-    return jsonify(datares)
-
-
-@app.route('/api/account_list/', methods=['POST'])
-def account_list():
-    request_data = request.json
-    phone = request_data.get('phone')
-    validate_token = request_data.get('validate_token')
-    cookies = request_data.get('cookies')
-
-    payload = [{"operationName":"AccountListQuery","variables":{"validate_token":validate_token,"phone":phone,"login_type":""},"query":"query AccountListQuery($validate_token: String!, $phone: String!, $login_type: String) {\n  accountsGetAccountsList(validate_token: $validate_token, phone: $phone, login_type: $login_type) {\n    key\n    msisdn_view\n    msisdn\n    users_details {\n      user_id\n      fullname\n      email\n      msisdn_verified\n      image\n      shop_detail {\n        id\n        name\n        domain\n        __typename\n      }\n      challenge_2fa\n      user_id_enc\n      __typename\n    }\n    users_count\n    errors {\n      name\n      message\n      __typename\n    }\n    __typename\n  }\n}\n"}]
-    json_data = json.dumps(payload)
-
-    sess = requests.Session()
-    # cookies_dict = ast.literal_eval(cookies)
-    # for key, value in cookies_dict.items():
-    #     sess.cookies.set(key, value)
-
-    res = sess.post(url, json_data, headers=headers)
-    cookies_new = sess.cookies.get_dict()
-    datares = json.loads(res.text)
-
-    return jsonify(datares)
+    return jsonify(response)
 
 
 @app.route('/api/login/', methods=['POST'])
@@ -220,9 +150,13 @@ def login():
     login_url = tokped.create_login_url(validate_token, phone)
 
     try:
-        login_data = tokped.login_with_email(driver, email, login_url)
+        login_data, ok = tokped.login_with_email(driver, email, login_url, phone)
     except Exception as e:
-        response['message'] = e
+        response['message'] = str(e)
+        response['status'] = 'Failed'
+        return jsonify(response)
+    if not ok:
+        response['message'] = str(login_data)
         response['status'] = 'Failed'
         return jsonify(response)
 
@@ -319,7 +253,7 @@ def request_otp1():
     try:
         is_ok, message = tokped.request_otp(driver)
     except Exception as e:
-        response['message'] = e
+        response['message'] = str(e)
         response['status'] = 'Failed'
         return jsonify(response)
     if not is_ok:
@@ -356,7 +290,7 @@ def send_otp1():
     try:
         login_data = tokped.send_otp(driver, otp, email)
     except Exception as e:
-        response['message'] = e
+        response['message'] = str(e)
         response['status'] = 'Failed'
         return jsonify(response)
 
