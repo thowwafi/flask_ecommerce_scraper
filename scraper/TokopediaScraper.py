@@ -1,15 +1,7 @@
 import ast
 import base64
-from datetime import datetime
 import json
-import os
-import pickle
-from utils.utils import sleep_time, makeDirIfNotExists
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
-from selenium.common.exceptions import TimeoutException
-from selenium.webdriver.common.keys import Keys
+from utils.utils import sleep_time
 import requests
 
 
