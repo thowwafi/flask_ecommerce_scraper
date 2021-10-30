@@ -360,17 +360,6 @@ class TokopediaScraper:
                             __typename
                         }
                         totalOrders
-                        filtersV2 {
-                                label
-                            value
-                            isPrimary
-                            __typename
-                        }
-                        categories {
-                                value
-                            label
-                            __typename
-                        }
                         dateLimit
                         tickers {
                                 action {
