@@ -10,6 +10,13 @@ pip install -r requirements.txt
 python app.py
 ```
 
+## Download Firefox WebDriver
+```
+Download link: https://github.com/mozilla/geckodriver/releases
+Download the appropriate webdriver for your operating system
+Put `geckodriver` in the root path
+```
+
 ## API requests
 1. Request OTP
 ```
