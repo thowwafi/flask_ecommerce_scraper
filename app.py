@@ -167,7 +167,7 @@ def login():
     cookies = driver.get_cookies()
     response = {
         "message": "Successfully login",
-        "session_id": str(cookies),
+        "session_token": str(cookies),
         "data": login_data
     }
 

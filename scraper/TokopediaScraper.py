@@ -163,20 +163,20 @@ class TokopediaScraper:
     def login_with_email(self, driver, email, login_url, phone):
         base_url = "http://tokopedia.com"
         driver.get(base_url)
-        driver.get_screenshot_as_file("screenshot4.png")
+        res = requests.get(login_url, headers=self.headers)
+        if res.status_code == 403:
+            return "Your request is forbidden. Please create new session.", False
         driver.get(login_url)
-        driver.get_screenshot_as_file("screenshot5.png")
         sleep_time(2)
         email_choices = driver.find_elements_by_xpath("//p[@class='m-0']")
         if email_choices and email:
             print(email)
             selected_el = [e for e in email_choices if e.text == email]
-            print(selected_el)
+            if not selected_el:
+                return f"Email {email} not found.", False
             selected_el[0].click()
         sleep_time(2)
-        driver.get_screenshot_as_file("screenshot6.png")
         driver.get(base_url + "/order-list")
-        driver.get_screenshot_as_file("screenshot7.png")
         sleep_time(2)
         sess = requests.Session()
         for cookie in driver.get_cookies():
@@ -228,25 +228,6 @@ class TokopediaScraper:
           __typename
         }
         \n}\n"""}]
-
-    def create_session_id(self):
-        return datetime.now().strftime("%Y%m%d%H%M%S")
-    
-    def save_session(self, root_path, driver):
-        session_id = self.create_session_id()
-        cookies_folder = os.path.join(root_path, 'cookies')
-        makeDirIfNotExists(cookies_folder)
-        cookie_file = os.path.join(cookies_folder, f"cookies_{session_id}.pkl")
-        pickle.dump(driver.get_cookies(), open(cookie_file, "wb"))
-        return session_id
-
-    def load_session1(self, session_id, root_path):
-        """
-        Load saved cookies by session_id
-        """
-        cookies_folder = os.path.join(root_path, 'cookies')
-        cookie_file = os.path.join(cookies_folder, f"cookies_{session_id}.pkl")
-        return pickle.load(open(cookie_file, "rb"))
 
     def load_session(self, session_token):
         """
@@ -414,55 +395,7 @@ class TokopediaScraper:
             }
         ]
 
-    def run_web_method(self, driver, phone):
-        web_url = "http://tokopedia.com"
-        driver.get(web_url)
-        my_element = driver.find_element_by_xpath("//button[text()='Masuk']")
-        my_element.click()
-        sleep_time(3)
-        element = driver.find_element_by_id("email-phone")
-        element.send_keys(phone + Keys.ENTER)
-        sleep_time(3)
-        element_ = driver.find_elements_by_xpath("//*[@class='unf-card css-19d2cr0-unf-card e1ukdezh0']")
-        if element_:
-            print("Got it")
-            element_[0].click()
-        sleep_time(5)
-        print("Input OTP")
-        otp = input()
-        otp_element = driver.find_elements_by_xpath("//*[@class='css-1ca56s1']")
-        if otp_element:
-            print("Got it")
-            otp_element[0].send_keys(otp)
-        sleep_time(3)
-        account_elements = driver.find_elements_by_xpath("//*[@class='css-rcj2s']")
-        if account_elements:
-            print("Got it")
-            account_elements[1].click()
-        sleep_time(3)
-        personal_pin = driver.find_elements_by_xpath("//*[@class='css-1bzs0jc']")
-        if personal_pin:
-            print("Input PIN")
-            pin_number = input()
-            personal_pin[0].send_keys(pin_number)
-        sleep_time(5)
-        driver.get(web_url + "/order-list")
-        print(driver.get_cookies())
-        cookies = driver.get_cookies()
-        sess = requests.Session()
-        for cookie in cookies:
-            print(cookie['name'], cookie['value'])
-            sess.cookies.set(cookie['name'], cookie['value'])
-
-        payload = [{"operationName":"GetOrderHistory","variables":{"VerticalCategory":"","Status":"","SearchableText":"","CreateTimeStart":start_at,"CreateTimeEnd":end_at,"Page":1,"Limit":10},"query":"query GetOrderHistory($VerticalCategory: String!, $Status: String!, $SearchableText: String!, $CreateTimeStart: String!, $CreateTimeEnd: String!, $Page: Int!, $Limit: Int!) {\n  uohOrders(input: {UUID: \"\", VerticalID: \"\", VerticalCategory: $VerticalCategory, Status: $Status, SearchableText: $SearchableText, CreateTime: \"\", CreateTimeStart: $CreateTimeStart, CreateTimeEnd: $CreateTimeEnd, Page: $Page, Limit: $Limit, SortBy: \"\", IsSortAsc: false}) {\n    orders {\n      orderUUID\n      verticalID\n      verticalCategory\n      userID\n      status\n      verticalStatus\n      searchableText\n      metadata {\n        upstream\n        verticalLogo\n        verticalLabel\n        paymentDate\n        paymentDateStr\n        queryParams\n        listProducts\n        detailURL {\n          webURL\n          webTypeLink\n          __typename\n        }\n        status {\n          label\n          textColor\n          bgColor\n          __typename\n        }\n        products {\n          title\n          imageURL\n          inline1 {\n            label\n            textColor\n            bgColor\n            __typename\n          }\n          inline2 {\n            label\n            textColor\n            bgColor\n            __typename\n          }\n          __typename\n        }\n        otherInfo {\n          actionType\n          appURL\n          webURL\n          label\n          textColor\n          bgColor\n          __typename\n        }\n        totalPrice {\n          value\n          label\n          textColor\n          bgColor\n          __typename\n        }\n        tickers {\n          action {\n            actionType\n            appURL\n            webURL\n            label\n            textColor\n            bgColor\n            __typename\n          }\n          title\n          text\n          type\n          isFull\n          __typename\n        }\n        buttons {\n          Label\n          variantColor\n          type\n          actionType\n          appURL\n          webURL\n          __typename\n        }\n        dotMenus {\n          actionType\n          appURL\n          webURL\n          label\n          textColor\n          bgColor\n          __typename\n        }\n        __typename\n      }\n      createTime\n      createBy\n      updateTime\n      updateBy\n      __typename\n    }\n    totalOrders\n    filtersV2 {\n      label\n      value\n      isPrimary\n      __typename\n    }\n    categories {\n      value\n      label\n      __typename\n    }\n    dateLimit\n    tickers {\n      action {\n        actionType\n        appURL\n        webURL\n        label\n        textColor\n        bgColor\n        __typename\n      }\n      title\n      text\n      type\n      isFull\n      __typename\n    }\n    __typename\n  }\n}\n"}]
-        json_data = json.dumps(payload)
-        gql_url = "https://gql.tokopedia.com/"
-        print("here")
-        res = sess.post(gql_url, json_data, headers=self.headers)
-        datares = json.loads(res.text)
-        print(datares)
-        return datares
-
+# TODO
 # dibutuhkan untuk setelah otp/login :
 # - account _holder
 # - account number (bisa no rekening jika bank, no hp untuk e-wallet biasanya)
