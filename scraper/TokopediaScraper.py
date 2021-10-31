@@ -157,7 +157,7 @@ class TokopediaScraper:
         driver.get(base_url)
         res = requests.get(login_url, headers=self.headers)
         if res.status_code == 403:
-            return "Your request is forbidden. Please create new session.", False
+            return "Your validate token is expired. Please create new session.", False
         driver.get(login_url)
         sleep_time(2)
         email_choices = driver.find_elements_by_xpath("//p[@class='m-0']")
