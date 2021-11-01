@@ -159,7 +159,7 @@ class TokopediaScraper:
         if res.status_code == 403:
             return "Your validate token is expired. Please create new session.", False
         driver.get(login_url)
-        # sleep_time(2)
+        sleep_time(2)
         email_choices = driver.find_elements_by_xpath("//p[@class='m-0']")
         if email_choices and email:
             print(email)
@@ -167,9 +167,9 @@ class TokopediaScraper:
             if not selected_el:
                 return f"Email {email} not found.", False
             selected_el[0].click()
-        # sleep_time(2)
+        sleep_time(2)
         driver.get(base_url + "/order-list")
-        # sleep_time(2)
+        sleep_time(2)
         sess = requests.Session()
         for cookie in driver.get_cookies():
             sess.cookies.set(cookie['name'], cookie['value'])
