@@ -1,6 +1,8 @@
 from flask import Flask
 from flask import request, jsonify
+import requests
 from scraper.TokopediaScraper import TokopediaScraper
+from scraper.DanaScraper import DanaScraper
 from utils.utils import initialize_webdriver
 
 
@@ -156,7 +158,48 @@ def transaction_list():
     response['data'] = data
 
     return jsonify(response)
-    
+
+
+@app.route('/api/dana/request_otp/', methods=['POST'])
+def dana_request_otp():
+    request_data = request.json
+    phone = request_data.get('phone')
+    pin = request_data.get('pin')
+    driver, message = initialize_webdriver(app.root_path)
+
+    response = {}
+    if not driver:
+        response['message'] = str(message)
+        response['status'] = 'Failed'
+        return jsonify(response), 500
+    dana = DanaScraper()
+    url = dana.login(driver, phone, pin)
+    response['status'] = 'Success'
+    response['url'] = url
+    response['session_token'] = str(driver.get_cookies())
+    driver.quit()
+    return jsonify(response)
+
+
+@app.route('/api/dana/send_otp/', methods=['POST'])
+def dana_send_otp():
+    request_data = request.json
+    url = request_data.get('url')
+    otp = request_data.get('otp')
+    session_token = request_data.get('session_token')
+
+    driver, message = initialize_webdriver(app.root_path)
+    response = {}
+    if not driver:
+        response['message'] = str(message)
+        response['status'] = 'Failed'
+        return jsonify(response), 500
+    dana = DanaScraper()
+    url = dana.send_otp(driver, url, otp, session_token)
+    response['status'] = 'Success'
+    response['session_token'] = str(driver.get_cookies())
+    driver.quit()
+    return jsonify(response)
 
 if __name__ == '__main__':
    app.run()
