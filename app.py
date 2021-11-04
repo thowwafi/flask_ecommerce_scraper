@@ -84,12 +84,13 @@ def send_otp():
         response['message'] = errors[0]['message']
         return jsonify(response), 500
 
-    count_users = len(data_res[0]['data']['accountsGetAccountsList']['users_details'])
+    users_details = data_res[0]['data']['accountsGetAccountsList']['users_details']
+    count_users = len(users_details)
     if  count_users > 1:
         response["status"] = "Success"
         response["message"] = f"You have {count_users} different emails please choose one."
         response["validate_token"] = validate_token
-        response["user_data"] = data_res[0]['data']['accountsGetAccountsList']
+        response["user_data"] = [user.get('email') for user in users_details]
         return jsonify(response)
 
     driver, message = initialize_webdriver(app.root_path)
