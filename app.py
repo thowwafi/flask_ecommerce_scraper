@@ -86,11 +86,46 @@ def send_otp():
         response['message'] = errors[0]['message']
         return jsonify(response), 500
 
-    response["status"] = "Success"
-    response["message"] = ""
-    response["validate_token"] = validate_token
-    response["user_data"] = data_res[0]['data']['accountsGetAccountsList']
-    
+    users_details = data_res[0]['data']['accountsGetAccountsList']['users_details']
+    count_users = len(users_details)
+    if  count_users > 1:
+        response["status"] = "Success"
+        response["message"] = f"You have {count_users} different emails please choose one."
+        response["validate_token"] = validate_token
+        response["user_data"] = [user.get('email') for user in users_details]
+        return jsonify(response)
+
+    driver, message = initialize_webdriver(app.root_path)
+    if not driver:
+        response['message'] = str(message)
+        response['status'] = 'Failed'
+        return jsonify(response), 500
+
+    login_url = tokped.create_login_url(validate_token, phone)
+    try:
+        login_data, ok = tokped.login_with_email(driver, None, login_url, phone)
+    except Exception as e:
+        response['message'] = str(e)
+        response['status'] = 'Failed'
+        return jsonify(response), 500
+    if not ok:
+        response['message'] = str(login_data)
+        response['status'] = 'Failed'
+        return jsonify(response), 500
+
+    try:
+        session_token = tokped.get_session_token(driver)
+    except Exception as e:
+        response['message'] = "Session ID error. {e}"
+        response['status'] = 'Failed'
+        return jsonify(response), 500
+
+    response = {
+        "message": "Successfully login",
+        "session_token": session_token,
+        "data": login_data
+    }
+    driver.quit()
     return jsonify(response)
 
 
@@ -126,13 +161,19 @@ def login():
         response['status'] = 'Failed'
         return jsonify(response), 500
 
-    cookies = driver.get_cookies()
+    try:
+        session_token = tokped.get_session_token(driver)
+    except Exception as e:
+        response['message'] = "Session ID error. {e}"
+        response['status'] = 'Failed'
+        return jsonify(response), 500
+
     response = {
         "message": "Successfully login",
-        "session_token": str(cookies),
+        "session_token": session_token,
         "data": login_data
     }
-
+    driver.quit()
     return jsonify(response)
 
 

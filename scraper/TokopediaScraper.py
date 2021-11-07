@@ -178,6 +178,16 @@ class TokopediaScraper:
         datares = json.loads(res.text)
         return datares, True
 
+    def get_session_token(self, driver):
+        """
+        Get session token after login
+        @driver: selenium webdriver
+        @Return session_token
+        """
+        cookies = driver.get_cookies()
+        sid = [cookie.get('value') for cookie in cookies if cookie.get('name') == "_SID_Tokopedia_"]
+        return sid[0]
+
     def account_payload(self):
         return [{"operationName":"Account","variables":{},"query":"""query Account {
             user {
@@ -225,11 +235,8 @@ class TokopediaScraper:
         """
         Load cookies into requests session
         """
-        cookies = ast.literal_eval(session_token)
         sess = requests.Session()
-        for cookie in cookies:
-            print(cookie['name'], cookie['value'])
-            sess.cookies.set(cookie['name'], cookie['value'])
+        sess.cookies.set("_SID_Tokopedia_", session_token)
         return sess
 
     def get_order_history(self, session, start_at, end_at):
