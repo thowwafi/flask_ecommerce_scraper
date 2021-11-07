@@ -205,6 +205,8 @@ def transaction_list():
 def dana_request_otp():
     request_data = request.json
     phone = request_data.get('phone')
+    if phone.startswith('0'):
+        phone = phone[1:]
     pin = request_data.get('pin')
     driver, message = initialize_webdriver(app.root_path)
 
@@ -213,10 +215,11 @@ def dana_request_otp():
         response['message'] = str(message)
         response['status'] = 'Failed'
         return jsonify(response), 500
+
     dana = DanaScraper()
-    url = dana.login(driver, phone, pin)
+    security_id = dana.login(driver, phone, pin)
     response['status'] = 'Success'
-    response['url'] = url
+    response['security_id'] = security_id
     response['session_token'] = str(driver.get_cookies())
     driver.quit()
     return jsonify(response)
