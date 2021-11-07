@@ -228,8 +228,11 @@ def dana_request_otp():
 @app.route('/api/dana/send_otp/', methods=['POST'])
 def dana_send_otp():
     request_data = request.json
-    url = request_data.get('url')
+    phone = request_data.get('phone')
+    if phone.startswith('0'):
+        phone = phone[1:]
     otp = request_data.get('otp')
+    security_id = request_data.get('security_id')
     session_token = request_data.get('session_token')
 
     driver, message = initialize_webdriver(app.root_path)
@@ -239,9 +242,10 @@ def dana_send_otp():
         response['status'] = 'Failed'
         return jsonify(response), 500
     dana = DanaScraper()
-    url = dana.send_otp(driver, url, otp, session_token)
+    data = dana.send_otp(driver, security_id, otp, session_token, phone)
     response['status'] = 'Success'
     response['session_token'] = str(driver.get_cookies())
+    response['data'] = data
     driver.quit()
     return jsonify(response)
 

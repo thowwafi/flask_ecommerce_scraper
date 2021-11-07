@@ -1,13 +1,14 @@
 import ast
-import pickle
+from bs4 import BeautifulSoup
+import json
+import re
 import requests
 from selenium.webdriver.common.keys import Keys
 from utils.utils import sleep_time
-import json
 
 
 class DanaScraper:
-    # login_url = "https://m.dana.id/d/portal/oauth"
+    base_url = "https://m.dana.id/d/portal/oauth"
     login_url = "https://m.dana.id/d/ipg/inputphone?ipgForwardUrl=%2Fd%2Fportal%2Foauth"
     pocket_url = "https://m.dana.id/d/pocket"
     completed_url = "https://m.dana.id/d/ipg/completed"
@@ -50,21 +51,45 @@ class DanaScraper:
         # driver.get(self.completed_url)
         # import pdb; pdb.set_trace()
 
-    def send_otp(self, driver, url, otp, cookies):
+    def send_otp(self, driver, security_id, otp, cookies, phone):
         driver.get(self.login_url)
 
         cookies = ast.literal_eval(cookies)
         for cookie in cookies:
+            cookie['sameSite'] = "Lax"
             driver.add_cookie(cookie)
-
+        url = f"https://m.dana.id/d/ipg/loginrisk?phoneNumber=62-{phone}&riskPhoneNumber=62-{phone[:3]}%2a%2a%2a%2a{phone[-4:]}&verificationMethods=OTP_SMS&securityId={security_id}"
+        print(url)
         driver.get(url)
-        sleep_time(2)
+        sleep_time(5)
         for o in otp:
             elem = driver.find_element_by_xpath("//input")
             elem.send_keys(o)
-        sleep_time(2)
+        sleep_time(5)
         driver.get(self.pocket_url)
         driver.get(self.completed_url)
-        # https://m.dana.id/d/portal/transaction?bizOrderId=2021091210121481030100166508924906902&paymentOrderId=2021091210110000010000DANAW3ID166508914488553
+        sleep_time(5)
+        orders_card = driver.find_elements_by_xpath("//div[@class='order-wrapper-card']")
+        orders_count = len(orders_card)
+        data = []
+        for i in range(orders_count):
+            order = {}
+            ord_elem = driver.find_elements_by_xpath("//div[@class='order-wrapper-card']")[i]
+            amount_text = ord_elem.find_element_by_xpath("//span[@class='card-amount order-amount']").text.strip()
+            order['amount'] = amount_text
+            ord_elem.click()
+            sleep_time(1)
+            if driver.find_elements_by_xpath("//div[@class='wrapper-transaction-detail']"):
+                soup = BeautifulSoup(driver.page_source, 'html.parser')
+                order['order_title'] = soup.find("p", {"class": "header-desc"}).text.strip()
+                order['payment_method'] = soup.find("div", {"class": "transaction-change-bank"}).text.strip()
+                order['amount'] = soup.find("p", {"class": "header-amount"}).text.strip()
+                summaries = soup.find_all("div", {"class": "summary-info"})
+                for summary in summaries:
+                    order[summary.find_all("div")[0].text.strip()] = summary.find_all("div")[1].text.strip()
+                sleep_time(1)
+            driver.get(self.completed_url)
+            sleep_time(1)
+            data.append(order)
 
-
+        return data
