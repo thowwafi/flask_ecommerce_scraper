@@ -34,11 +34,11 @@ class DanaScraper:
         driver.get(self.login_url)
         elem = driver.find_element_by_xpath("//input")
         elem.send_keys(phone + Keys.ENTER)
-        sleep_time(2)
+        sleep_time(5)
         for p in pin:
             elem = driver.find_element_by_xpath("//input")
             elem.send_keys(p)
-        sleep_time(2)
+        sleep_time(5)
         return driver.current_url.split("securityId=")[1]
 
         # print("Input OTP")
@@ -52,8 +52,14 @@ class DanaScraper:
         # import pdb; pdb.set_trace()
 
     def send_otp(self, driver, security_id, otp, cookies, phone):
-        driver.get(self.login_url)
+        import undetected_chromedriver.v2 as uc
+        from pprint import pformat
+        def mylousyprintfunction(eventdata):
+            print(eventdata)
+            # if eventdata['params']['response']['url'] == "https://m.dana.id/wallet/api/alipayplus.mobilewallet.user.transaction.list.json":
 
+        driver = uc.Chrome(enable_cdp_events=True)
+        driver.get(self.login_url)
         cookies = ast.literal_eval(cookies)
         for cookie in cookies:
             cookie['sameSite'] = "Lax"
@@ -79,6 +85,9 @@ class DanaScraper:
             order['amount'] = amount_text
             ord_elem.click()
             sleep_time(1)
+            # driver.add_cdp_listener('Network.responseReceived', mylousyprintfunction)
+            driver.add_cdp_listener('Network.getResponseBody', mylousyprintfunction)
+
             if driver.find_elements_by_xpath("//div[@class='wrapper-transaction-detail']"):
                 soup = BeautifulSoup(driver.page_source, 'html.parser')
                 order['order_title'] = soup.find("p", {"class": "header-desc"}).text.strip()
