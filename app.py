@@ -236,13 +236,13 @@ def dana_send_otp():
     session_token = request_data.get('session_token')
 
     response = {}
-    # driver, message = initialize_webdriver(app.root_path)
-    # if not driver:
-    #     response['message'] = str(message)
-    #     response['status'] = 'Failed'
-    #     return jsonify(response), 500
+    driver, message = initialize_webdriver(app.root_path)
+    if not driver:
+        response['message'] = str(message)
+        response['status'] = 'Failed'
+        return jsonify(response), 500
     dana = DanaScraper()
-    data = dana.send_otp("driver", security_id, otp, session_token, phone)
+    data = dana.send_otp(driver, security_id, otp, session_token, phone)
     response['status'] = 'Success'
     response['session_token'] = str(driver.get_cookies())
     response['data'] = data

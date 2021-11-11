@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 import json
 import re
 import requests
+from requests.api import head
 from selenium.webdriver.common.keys import Keys
 from utils.utils import sleep_time
 
@@ -52,13 +53,13 @@ class DanaScraper:
         # import pdb; pdb.set_trace()
 
     def send_otp(self, driver, security_id, otp, cookies, phone):
-        import undetected_chromedriver.v2 as uc
-        from pprint import pformat
-        def mylousyprintfunction(eventdata):
-            print(eventdata)
-            # if eventdata['params']['response']['url'] == "https://m.dana.id/wallet/api/alipayplus.mobilewallet.user.transaction.list.json":
+        # import undetected_chromedriver.v2 as uc
+        # from pprint import pformat
+        # def mylousyprintfunction(eventdata):
+        #     print(eventdata)
+        #     # if eventdata['params']['response']['url'] == "https://m.dana.id/wallet/api/alipayplus.mobilewallet.user.transaction.list.json":
 
-        driver = uc.Chrome(enable_cdp_events=True)
+        # driver = uc.Chrome(enable_cdp_events=True)
         driver.get(self.login_url)
         cookies = ast.literal_eval(cookies)
         for cookie in cookies:
@@ -74,7 +75,27 @@ class DanaScraper:
         sleep_time(5)
         driver.get(self.pocket_url)
         driver.get(self.completed_url)
+        driver.get("https://m.dana.id/i/transaction/list/completed")
         sleep_time(5)
+
+        cookie_ = ""
+        for cookie in driver.get_cookies():
+            cookie_ += f"{cookie['name']}={cookie['value']}; "
+        headers = {
+            "Host": "m.dana.id",
+            "x-fe-version": "1.97.0",
+            "referrer": "https://m.dana.id/i/transaction/list/progressing",
+            "x-appkey": "23936057",
+            "user-agent": "Skywalker/2.0.0 EDIK/1.0.0 Dalvik/2.1.0 (Linux; Android 5.1; PRO 5 Build/LMY47D)",
+            "cookie": cookie_,
+            "content-type": "application/json; charset\u003dutf-8",
+        }
+        payload = {
+            "transactionQueryType": "COMPLETED", "pageNum":1
+        }
+        url = "https://m.dana.id/wallet/api/alipayplus.mobilewallet.user.transaction.list.json"
+        resp = requests.post(url, headers=headers, data=json.dumps(payload))
+        import pdb; pdb.set_trace()
         orders_card = driver.find_elements_by_xpath("//div[@class='order-wrapper-card']")
         orders_count = len(orders_card)
         data = []
