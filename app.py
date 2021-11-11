@@ -217,10 +217,13 @@ def dana_request_otp():
         return jsonify(response), 500
 
     dana = DanaScraper()
-    security_id = dana.login(driver, phone, pin)
+    security_id = dana.request_otp(driver, phone, pin)
+    cookie_ = "".join(
+        f"{cookie['name']}={cookie['value']}; "
+        for cookie in driver.get_cookies()
+    )
     response['status'] = 'Success'
-    response['security_id'] = security_id
-    response['session_token'] = str(driver.get_cookies())
+    response['session_token'] = f"{cookie_}_____security_id={security_id}"
     driver.quit()
     return jsonify(response)
 
@@ -232,8 +235,10 @@ def dana_send_otp():
     if phone.startswith('0'):
         phone = phone[1:]
     otp = request_data.get('otp')
-    security_id = request_data.get('security_id')
-    session_token = request_data.get('session_token')
+    session_token_plus = request_data.get('session_token')
+
+    dana = DanaScraper()
+    session_token, security_id = dana.split_session_token(session_token_plus)
 
     response = {}
     driver, message = initialize_webdriver(app.root_path)
@@ -241,7 +246,7 @@ def dana_send_otp():
         response['message'] = str(message)
         response['status'] = 'Failed'
         return jsonify(response), 500
-    dana = DanaScraper()
+    
     data = dana.send_otp(driver, security_id, otp, session_token, phone)
     response['status'] = 'Success'
     response['session_token'] = str(driver.get_cookies())
