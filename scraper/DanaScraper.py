@@ -28,11 +28,17 @@ class DanaScraper:
         return driver.current_url.split("securityId=")[1]
 
     def split_session_token(self, session_token):
-        session_token_plus = ast.literal_eval(session_token)
-        session_token = [token for token in session_token_plus if token.get('name') != 'security_id']
-        security_id = [token for token in session_token_plus if token.get('name') == 'security_id']
-        value = security_id[0].get('value')
-        return session_token, value
+        tokens, security_id = session_token.split(";security_id=")
+        cookies = [{
+            "name": tokens.split("=")[0],
+            "value": tokens.split("=")[1],
+            'path': '/',
+            'domain': '.m.dana.id',
+            'secure': True,
+            'httpOnly': True,
+            'sameSite': 'None'
+        }]
+        return cookies, security_id
 
     def get_login_url(self, phone, security_id):
         return f"https://m.dana.id/d/ipg/loginrisk?phoneNumber=62-{phone}&riskPhoneNumber=62-{phone[:3]}%2a%2a%2a%2a{phone[-4:]}&verificationMethods=OTP_SMS&securityId={security_id}"

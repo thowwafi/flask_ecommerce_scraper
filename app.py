@@ -218,13 +218,10 @@ def dana_request_otp():
 
     dana = DanaScraper()
     security_id = dana.request_otp(driver, phone, pin)
-    cookie_ = "".join(
-        f"{cookie['name']}={cookie['value']}; "
-        for cookie in driver.get_cookies()
-    )
-    cookies = driver.get_cookies()
-    cookies.append({"name": "security_id", "value": security_id})
-    token = [i for i in cookies if i.get('name') in ['ALIPAYJSESSIONID', 'security_id']]
+
+    cookies = [i for i in driver.get_cookies() if i.get('name') == 'ALIPAYJSESSIONID']
+    token = f"{cookies[0]['name']}={cookies[0]['value']};security_id={security_id}"
+
     response['status'] = 'Success'
     response['session_token'] = f"{token}"
     driver.quit()
