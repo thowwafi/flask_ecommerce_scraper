@@ -208,9 +208,14 @@ def dana_request_otp():
     if phone.startswith('0'):
         phone = phone[1:]
     pin = request_data.get('pin')
-    driver, message = initialize_webdriver(app.root_path)
 
     response = {}
+    if not phone or not pin:
+        response['message'] = "phone and pin cannot be null."
+        response['status'] = 'Failed'
+        return jsonify(response), 400
+
+    driver, message = initialize_webdriver(app.root_path)
     if not driver:
         response['message'] = str(message)
         response['status'] = 'Failed'
@@ -220,10 +225,14 @@ def dana_request_otp():
     security_id = dana.request_otp(driver, phone, pin)
 
     cookies = [i for i in driver.get_cookies() if i.get('name') == 'ALIPAYJSESSIONID']
+    if not cookies:
+        response['message'] = "ALIPAYJSESSIONID not found."
+        response['status'] = 'Failed'
+        return jsonify(response), 500
     token = f"{cookies[0]['name']}={cookies[0]['value']};security_id={security_id}"
 
     response['status'] = 'Success'
-    response['session_token'] = f"{token}"
+    response['session_token'] = token
     driver.quit()
     return jsonify(response)
 
@@ -237,10 +246,15 @@ def dana_send_otp():
     otp = request_data.get('otp')
     session_token_plus = request_data.get('session_token')
 
+    response = {}
+    if not phone or not otp or not session_token_plus:
+        response['message'] = "phone, otp, pin, session_token cannot be null."
+        response['status'] = 'Failed'
+        return jsonify(response), 400
+
     dana = DanaScraper()
     session_token, security_id = dana.split_session_token(session_token_plus)
 
-    response = {}
     driver, message = initialize_webdriver(app.root_path)
     if not driver:
         response['message'] = str(message)
@@ -258,12 +272,27 @@ def dana_send_otp():
 def dana_transactions():
     request_data = request.json
     session_token = request_data.get('session_token')
+    start_at = request_data.get('start_at')
+    end_at = request_data.get('end_at')
 
     response = {}
+    if not session_token or not start_at or not end_at:
+        response['message'] = "session_token, start_at, end_at cannot be null."
+        response['status'] = 'Failed'
+        return jsonify(response), 400
+
     dana = DanaScraper()
-    data = dana.get_transactions(session_token)
+    start_date, end_date = dana.convert_date(start_at, end_at)
+    res = dana.get_transactions(session_token, start_date, end_date)
+    if res.status_code != 200:
+        response['message'] = "Token unauthorized."
+        response['status'] = 'Failed'
+        return jsonify(response), res.status_code
+
+    res_user = dana.get_user_info(session_token)
     response['status'] = 'Success'
-    response['data'] = data
+    response['transactions'] = res.json()
+    response['user'] = res_user.json()
     return jsonify(response)
 
 if __name__ == '__main__':

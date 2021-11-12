@@ -1,12 +1,8 @@
-import ast
-from bs4 import BeautifulSoup
+import cloudscraper
+from datetime import datetime, timedelta
 import json
-import re
-import requests
-from requests.api import head
 from selenium.webdriver.common.keys import Keys
 from utils.utils import sleep_time
-import cloudscraper
 
 
 class DanaScraper:
@@ -15,6 +11,15 @@ class DanaScraper:
     pocket_url = "https://m.dana.id/d/pocket"
     completed_url = "https://m.dana.id/i/transaction/list/completed"
     otp_url = "https://m.dana.id/d/ipg/loginrisk?phoneNumber=62-81272709003&riskPhoneNumber=62-812%2a%2a%2a%2a9003&verificationMethods=OTP_SMS&securityId=sidfe6627c617ec6f05c25cfcb4ae203011_crc&credentials=UGm4L4XrJizkp3slNgbV8CcrZ2YAhQneigN0R2rp5lrjXCFX1uiDiTndH9gFtuMcuXsq4ue69eCbaQGNbbPPkaecAiI29u2MnZs9PgxV9kDrHznT6ZgHGcoLQY5bNydYYbXWfwK6%2BtJ0wqB4R5jROxJy73%2FltF1T4oiwKJASmLNTecAd7guZgY8t%2Bdjcg8K3WDJdS3HB91BpJIykKCXEMEUBObTw5kEfEF%2BTrvNjAitFV3h3U1v7n3imp8C9etm%2BV%2B2TVbzAJlfMjR9n1VAk%2Beyjrwpd%2BTWqhJ2kg62VC%2BHn%2BzoWbvpP1H75G4KbSg91G2dmaMxJhbKEqJscoiVOIw%3D%3D&ipgForwardUrl=%2Fd%2Fportal%2Foauth"
+    headers = {
+        "Host": "m.dana.id",
+        "x-fe-version": "1.97.0",
+        "referrer": "https://m.dana.id/i/transaction/list/progressing",
+        "x-appkey": "23936057",
+        "user-agent": "Skywalker/2.0.0 EDIK/1.0.0 Dalvik/2.1.0 (Linux; Android 5.1; PRO 5 Build/LMY47D)",
+        "cookie": "",
+        "content-type": "application/json; charset\u003dutf-8",
+    }
 
     def request_otp(self, driver, phone, pin):
         driver.get(self.login_url)
@@ -36,7 +41,7 @@ class DanaScraper:
             'domain': '.m.dana.id',
             'secure': True,
             'httpOnly': True,
-            'sameSite': 'None'
+            'sameSite': 'Lax'
         }]
         return cookies, security_id
 
@@ -78,22 +83,30 @@ class DanaScraper:
             if cookie['name'] in ['ALIPAYJSESSIONID', '__cf_bm']
         )
 
-    def get_transactions(self, login_cookie):
-        headers = {
-            "Host": "m.dana.id",
-            "x-fe-version": "1.97.0",
-            "referrer": "https://m.dana.id/i/transaction/list/progressing",
-            "x-appkey": "23936057",
-            "user-agent": "Skywalker/2.0.0 EDIK/1.0.0 Dalvik/2.1.0 (Linux; Android 5.1; PRO 5 Build/LMY47D)",
-            "cookie": login_cookie,
-            "content-type": "application/json; charset\u003dutf-8",
-        }
+    def convert_date(self, start_at, end_at):
+        start_at = datetime.strptime(start_at, "%Y-%m-%d")
+        start_at_time = int(start_at.timestamp() * 1000)
+        end_at = datetime.strptime(end_at, "%Y-%m-%d")
+        end_at = end_at + timedelta(days=1)
+        end_at_time = int((end_at.timestamp() * 1000) - 1)
+        return start_at_time, end_at_time
+
+    def get_transactions(self, login_cookie, start_date, end_date):
+        self.headers['cookie'] = login_cookie
         payload = {
-            "transactionQueryType": "COMPLETED", "pageNum":1
+            "transactionQueryType": "COMPLETED", "pageNum":1,
+            "startDate": start_date,
+            "endDate": end_date
         }
+        print(payload)
         url = "https://m.dana.id/wallet/api/alipayplus.mobilewallet.user.transaction.list.json"
         scraper = cloudscraper.create_scraper(browser={'browser': 'firefox','platform': 'windows','mobile': False})
 
-        res = scraper.post(url, headers=headers, data=json.dumps(payload))
+        return scraper.post(url, headers=self.headers, data=json.dumps(payload))
 
-        return res.json()
+    def get_user_info(self, login_cookie):
+        self.headers['cookie'] = login_cookie
+        url = "https://m.dana.id/wallet/api/alipayplus.mobilewallet.user.information.more.json"
+        payload = {"queryType":"FULL"}
+        scraper = cloudscraper.create_scraper(browser={'browser': 'firefox','platform': 'windows','mobile': False})
+        return scraper.post(url, headers=self.headers, data=json.dumps(payload))
