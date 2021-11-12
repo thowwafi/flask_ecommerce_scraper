@@ -67,8 +67,9 @@ class DanaScraper:
         sleep_time(3)
 
         return "".join(
-            f"{cookie['name']}={cookie['value']}; "
+            f"{cookie['name']}={cookie['value']};"
             for cookie in driver.get_cookies()
+            if cookie['name'] in ['ALIPAYJSESSIONID', '__cf_bm']
         )
 
     def get_transactions(self, login_cookie):

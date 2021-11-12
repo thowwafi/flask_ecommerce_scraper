@@ -222,10 +222,11 @@ def dana_request_otp():
         f"{cookie['name']}={cookie['value']}; "
         for cookie in driver.get_cookies()
     )
-    session_token = driver.get_cookies()
-    session_token.append({"name": "security_id", "value": security_id})
+    cookies = driver.get_cookies()
+    cookies.append({"name": "security_id", "value": security_id})
+    token = [i for i in cookies if i.get('name') in ['ALIPAYJSESSIONID', 'security_id']]
     response['status'] = 'Success'
-    response['session_token'] = f"{session_token}"
+    response['session_token'] = f"{token}"
     driver.quit()
     return jsonify(response)
 
