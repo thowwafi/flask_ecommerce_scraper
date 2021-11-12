@@ -222,8 +222,10 @@ def dana_request_otp():
         f"{cookie['name']}={cookie['value']}; "
         for cookie in driver.get_cookies()
     )
+    session_token = driver.get_cookies()
+    session_token.append({"name": "security_id", "value": security_id})
     response['status'] = 'Success'
-    response['session_token'] = f"{cookie_}_____security_id={security_id}"
+    response['session_token'] = f"{session_token}"
     driver.quit()
     return jsonify(response)
 
@@ -247,11 +249,23 @@ def dana_send_otp():
         response['status'] = 'Failed'
         return jsonify(response), 500
     
-    data = dana.send_otp(driver, security_id, otp, session_token, phone)
+    login_cookie = dana.send_otp(driver, security_id, otp, session_token, phone)
     response['status'] = 'Success'
-    response['session_token'] = str(driver.get_cookies())
-    response['data'] = data
+    response['session_token'] = login_cookie
     driver.quit()
+    return jsonify(response)
+
+
+@app.route('/api/dana/transactions/', methods=['POST'])
+def dana_transactions():
+    request_data = request.json
+    session_token = request_data.get('session_token')
+
+    response = {}
+    dana = DanaScraper()
+    data = dana.get_transactions(session_token)
+    response['status'] = 'Success'
+    response['data'] = data
     return jsonify(response)
 
 if __name__ == '__main__':

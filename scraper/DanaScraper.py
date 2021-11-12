@@ -28,7 +28,11 @@ class DanaScraper:
         return driver.current_url.split("securityId=")[1]
 
     def split_session_token(self, session_token):
-        return session_token.split("_____security_id=")
+        session_token_plus = ast.literal_eval(session_token)
+        session_token = [token for token in session_token_plus if token.get('name') != 'security_id']
+        security_id = [token for token in session_token_plus if token.get('name') == 'security_id']
+        value = security_id[0].get('value')
+        return session_token, value
 
     def get_login_url(self, phone, security_id):
         return f"https://m.dana.id/d/ipg/loginrisk?phoneNumber=62-{phone}&riskPhoneNumber=62-{phone[:3]}%2a%2a%2a%2a{phone[-4:]}&verificationMethods=OTP_SMS&securityId={security_id}"
@@ -46,10 +50,10 @@ class DanaScraper:
 
     def send_otp(self, driver, security_id, otp, cookies, phone):
         driver.get(self.login_url)
-        cookie_list = self.create_cookie_list(cookies)
-        for cookie in cookie_list:
+
+        for cookie in cookies:
             driver.add_cookie(cookie)
-        
+
         url = self.get_login_url(phone, security_id)
         print(url)
         driver.get(url)
@@ -62,11 +66,12 @@ class DanaScraper:
         driver.get(self.completed_url)
         sleep_time(3)
 
-        login_cookie = "".join(
+        return "".join(
             f"{cookie['name']}={cookie['value']}; "
             for cookie in driver.get_cookies()
         )
 
+    def get_transactions(self, login_cookie):
         headers = {
             "Host": "m.dana.id",
             "x-fe-version": "1.97.0",
@@ -83,31 +88,5 @@ class DanaScraper:
         scraper = cloudscraper.create_scraper(browser={'browser': 'firefox','platform': 'windows','mobile': False})
 
         res = scraper.post(url, headers=headers, data=json.dumps(payload))
-        import pdb; pdb.set_trace()
-        # orders_card = driver.find_elements_by_xpath("//div[@class='order-wrapper-card']")
-        # orders_count = len(orders_card)
-        # data = []
-        # for i in range(orders_count):
-        #     order = {}
-        #     ord_elem = driver.find_elements_by_xpath("//div[@class='order-wrapper-card']")[i]
-        #     amount_text = ord_elem.find_element_by_xpath("//span[@class='card-amount order-amount']").text.strip()
-        #     order['amount'] = amount_text
-        #     ord_elem.click()
-        #     sleep_time(1)
-        #     # driver.add_cdp_listener('Network.responseReceived', mylousyprintfunction)
-        #     driver.add_cdp_listener('Network.getResponseBody', mylousyprintfunction)
-
-        #     if driver.find_elements_by_xpath("//div[@class='wrapper-transaction-detail']"):
-        #         soup = BeautifulSoup(driver.page_source, 'html.parser')
-        #         order['order_title'] = soup.find("p", {"class": "header-desc"}).text.strip()
-        #         order['payment_method'] = soup.find("div", {"class": "transaction-change-bank"}).text.strip()
-        #         order['amount'] = soup.find("p", {"class": "header-amount"}).text.strip()
-        #         summaries = soup.find_all("div", {"class": "summary-info"})
-        #         for summary in summaries:
-        #             order[summary.find_all("div")[0].text.strip()] = summary.find_all("div")[1].text.strip()
-        #         sleep_time(1)
-        #     driver.get(self.completed_url)
-        #     sleep_time(1)
-        #     data.append(order)
 
         return res.json()
