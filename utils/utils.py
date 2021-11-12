@@ -1,7 +1,6 @@
 import os
 import time
 from selenium import webdriver
-from seleniumwire import webdriver as seleniumwire_webdriver
 from selenium.webdriver.chrome.options import Options as COptions
 from selenium.webdriver.firefox.options import Options as FOptions
 

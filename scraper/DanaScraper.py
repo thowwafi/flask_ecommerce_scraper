@@ -60,14 +60,14 @@ class DanaScraper:
         url = self.get_login_url(phone, security_id)
         print(url)
         driver.get(url)
-        sleep_time(3)
+        sleep_time(2)
         for o in otp:
             elem = driver.find_element_by_xpath("//input")
             elem.send_keys(o)
-        sleep_time(3)
+        sleep_time(2)
         driver.get(self.pocket_url)
         driver.get(self.completed_url)
-        sleep_time(3)
+        sleep_time(2)
 
         return "".join(
             f"{cookie['name']}={cookie['value']};"
