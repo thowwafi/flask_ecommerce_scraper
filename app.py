@@ -289,6 +289,11 @@ def dana_transactions():
         response['status'] = 'Failed'
         return jsonify(response), res.status_code
 
+    if not res.json().get('result').get('success'):
+        response['status'] = 'Failed'
+        response['message'] = res.json().get('result').get('errorMsg')
+        return jsonify(response), res.status_code
+
     res_user = dana.get_user_info(session_token)
     response['status'] = 'Success'
     response['transactions'] = res.json()
