@@ -72,7 +72,7 @@ class DanaScraper:
         return "".join(
             f"{cookie['name']}={cookie['value']};"
             for cookie in driver.get_cookies()
-            if cookie['name'] in ['ALIPAYJSESSIONID', '__cf_bm']
+            if cookie['name'] in ['ALIPAYJSESSIONID']
         )
 
     def convert_date(self, start_at, end_at):
