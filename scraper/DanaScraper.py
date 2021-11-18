@@ -2,6 +2,10 @@ import cloudscraper
 from datetime import datetime, timedelta
 import json
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
+from selenium.common.exceptions import TimeoutException
 from utils.utils import sleep_time
 
 
@@ -21,7 +25,14 @@ class DanaScraper:
             elem = driver.find_element_by_xpath("//input")
             elem.send_keys(p)
         sleep_time(2)
-        return driver.current_url.split("securityId=")[1]
+        delay = 2
+        try:
+            toast = WebDriverWait(driver, delay).until(EC.presence_of_element_located((By.CLASS_NAME, 'toast')))
+            print('myElem', toast.text)
+            return toast.text, False
+        except TimeoutException:
+            print("Loading took too much time!")
+        return driver.current_url.split("securityId=")[1], True
 
     def split_session_token(self, session_token):
         tokens, security_id = session_token.split(";security_id=")
@@ -64,15 +75,26 @@ class DanaScraper:
             elem = driver.find_element_by_xpath("//input")
             elem.send_keys(o)
         sleep_time(2)
-        driver.get(self.pocket_url)
+        delay = 2
+        try:
+            toast = WebDriverWait(driver, delay).until(EC.presence_of_element_located((By.CLASS_NAME, 'toast ')))
+            print('myElem', toast.text)
+            if "OTP tidak sesuai." in toast.text:
+                return toast.text, False
+        except TimeoutException:
+            print("Loading took too much time!")
+
         driver.get(self.completed_url)
         sleep_time(2)
+        if driver.current_url != self.completed_url:
+            return "Session not created, please try again.", False
 
-        return "".join(
+        session_token =  "".join(
             f"{cookie['name']}={cookie['value']};"
             for cookie in driver.get_cookies()
             if cookie['name'] in ['ALIPAYJSESSIONID']
         )
+        return session_token, True
 
     def convert_date(self, start_at, end_at):
         start_at = datetime.strptime(start_at, "%Y-%m-%d")

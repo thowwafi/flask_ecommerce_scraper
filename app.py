@@ -222,7 +222,13 @@ def dana_request_otp():
         return jsonify(response), 500
 
     dana = DanaScraper()
-    security_id = dana.request_otp(driver, phone, pin)
+    security_id, ok = dana.request_otp(driver, phone, pin)
+    if not ok:
+        response['message'] = security_id + "Salah PIN 3 kali akan membuat akun anda terblokir selama 1 jam."
+        response['status'] = 'Failed'
+        response['error_code'] = 'INVALID_CREDENTIALS'
+        driver.quit()
+        return jsonify(response), 400
 
     cookies = [i for i in driver.get_cookies() if i.get('name') == 'ALIPAYJSESSIONID']
     if not cookies:
@@ -261,7 +267,13 @@ def dana_send_otp():
         response['status'] = 'Failed'
         return jsonify(response), 500
     
-    login_cookie = dana.send_otp(driver, security_id, otp, session_token, phone)
+    login_cookie, ok = dana.send_otp(driver, security_id, otp, session_token, phone)
+    if not ok:
+        response['message'] = login_cookie
+        response['status'] = 'Failed'
+        response['error_code'] = 'INVALID_OTP'
+        driver.quit()
+        return jsonify(response), 400
     response['status'] = 'Success'
     response['session_token'] = login_cookie
     driver.quit()
@@ -292,6 +304,7 @@ def dana_transactions():
     if not res.json().get('result').get('success'):
         response['status'] = 'Failed'
         response['message'] = res.json().get('result').get('errorMsg')
+        response['error_code'] = 'SESSION_EXPIRED'
         return jsonify(response), res.status_code
 
     res_user = dana.get_user_info(session_token)
