@@ -224,7 +224,7 @@ def dana_request_otp():
     dana = DanaScraper()
     security_id, ok = dana.request_otp(driver, phone, pin)
     if not ok:
-        response['message'] = security_id + "Salah PIN 3 kali akan membuat akun anda terblokir selama 1 jam."
+        response['message'] = security_id + " Salah PIN 3 kali akan membuat akun anda terblokir selama 1 jam."
         response['status'] = 'Failed'
         response['error_code'] = 'INVALID_CREDENTIALS'
         driver.quit()

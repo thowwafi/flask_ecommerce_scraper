@@ -31,7 +31,9 @@ class DanaScraper:
             print('myElem', toast.text)
             return toast.text, False
         except TimeoutException:
-            print("Loading took too much time!")
+            pass
+        if "securityId=" not in driver.current_url:
+            return "Pastikan PIN anda sudah benar.", False
         return driver.current_url.split("securityId=")[1], True
 
     def split_session_token(self, session_token):
@@ -82,7 +84,7 @@ class DanaScraper:
             if "OTP tidak sesuai." in toast.text:
                 return toast.text, False
         except TimeoutException:
-            print("Loading took too much time!")
+            pass
 
         driver.get(self.completed_url)
         sleep_time(2)
