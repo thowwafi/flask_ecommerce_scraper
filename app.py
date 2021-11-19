@@ -3,6 +3,7 @@ from flask import request, jsonify
 import requests
 from scraper.TokopediaScraper import TokopediaScraper
 from scraper.DanaScraper import DanaScraper
+from scraper.BukalapakScraper import BukalapakScraper
 from utils.utils import initialize_webdriver
 
 
@@ -312,6 +313,55 @@ def dana_transactions():
     response['transactions'] = res.json()
     response['user'] = res_user.json()
     return jsonify(response)
+
+
+@app.route('/api/bl/request_otp/', methods=['POST'])
+def bl_request_otp():
+    request_data = request.json
+    phone = request_data.get('phone')
+
+    response = {}
+    if not phone:
+        response['message'] = "phone cannot be null."
+        response['status'] = 'Failed'
+        return jsonify(response), 400
+
+    driver, message = initialize_webdriver(app.root_path)
+    if not driver:
+        response['message'] = str(message)
+        response['status'] = 'Failed'
+        return jsonify(response), 500
+
+    bl = BukalapakScraper()
+    cookies = bl.request_otp(driver, phone)
+
+    response['status'] = 'Success'
+    response['session_token'] = str(cookies)
+    driver.quit()
+    return jsonify(response)
+
+
+@app.route('/api/bl/send_otp/', methods=['POST'])
+def bl_send_otp():
+    request_data = request.json
+    phone = request_data.get('phone')
+    otp = request_data.get('otp')
+    session_token = request_data.get('session_token')
+
+    response = {}
+    if not phone or not otp or not session_token:
+        response['message'] = "phone, otp, session_token cannot be null."
+        response['status'] = 'Failed'
+        return jsonify(response), 400
+
+    driver, message = initialize_webdriver(app.root_path)
+    if not driver:
+        response['message'] = str(message)
+        response['status'] = 'Failed'
+        return jsonify(response), 500
+
+    bl = BukalapakScraper()
+    cookies = bl.send_otp(driver, otp, session_token, phone)
 
 if __name__ == '__main__':
    app.run()
