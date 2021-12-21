@@ -3,6 +3,7 @@ import base64
 import json
 from utils.utils import sleep_time
 import requests
+from selenium.webdriver.common.keys import Keys
 
 
 class TokopediaScraper:
@@ -48,6 +49,25 @@ class TokopediaScraper:
         phone_enc = self.encode_phone(phone)
         return f"https://accounts.tokopedia.com/otp/c/page?otp_type=112&m_encd={phone_enc}&popup=false&header=true&redirect_parent=false&ld=https%3A%2F%2Faccounts.tokopedia.com%2Flpn%2Fusers%3Fencoded%3D{phone_enc}%26client_id%3D%26redirect_uri%3D%26state%3D"
 
+    def request_otp_by_email(self, driver, email, password):
+        """
+        Request OTP by email
+        @email: email
+        @password: password
+        @return response data
+        """
+        login_url = "https://accounts.tokopedia.com/login"
+        driver.get(login_url)
+        sleep_time(2)
+        driver.find_element_by_xpath("//input[@name='email']").send_keys(email + Keys.ENTER)
+        sleep_time(2)
+        driver.find_element_by_xpath("//input[@name='password']").send_keys(password + Keys.ENTER)
+        sleep_time(2)
+        driver.find_element_by_xpath("//div[@id='cotp__method--sms']").click()
+        sleep_time(2)
+        login_token = driver.current_url.split("page?")[1]
+        return {"login_token": login_token}
+    
     def request_otp(self, phone):
         """
         Request OTP by phone

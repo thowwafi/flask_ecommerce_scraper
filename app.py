@@ -21,20 +21,51 @@ def request_otp():
     """
     @Body: 
     {
-        "phone": "080989999"
+        "type": "phone"/"email",
+        "phone": "080989999",
+        "email": "someone@gmail.com",
+        "password": "password"
     }
     """
     request_data = request.json
+
+    type_ = request_data.get('type')
     phone = request_data.get('phone')
+    email = request_data.get('email')
+    password = request_data.get('password')
+
     response = {}
-    if not phone:
+    if not type_:
+        response['status'] = 'Failed'
+        response['message'] = 'Type cannot be null'
+        return jsonify(response), 400
+
+    if type_ not in ["phone", "email"]:
+        response['status'] = 'Failed'
+        response['message'] = 'Type must be phone or email'
+        return jsonify(response), 400
+
+    if type_ == "phone" and not phone:
         response['status'] = 'Failed'
         response['message'] = 'Phone cannot be null'
         return jsonify(response), 400
 
+    if type_ == "email" and not email or not password:
+        response['status'] = 'Failed'
+        response['message'] = 'Email and password cannot be null'
+        return jsonify(response), 400
+
     tokped = TokopediaScraper()
     try:
-        data_res = tokped.request_otp(phone)
+        if type_ == "phone":
+            data_res = tokped.request_otp(phone)
+        else:
+            driver, message = initialize_webdriver(app.root_path)
+            if not driver:
+                response['message'] = str(message)
+                response['status'] = 'Failed'
+                return jsonify(response), 500
+            data_res = tokped.request_otp_by_email(driver, email, password)
     except Exception as e:
         response['status'] = 'Failed'
         response['message'] = str(e)
