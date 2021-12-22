@@ -49,7 +49,7 @@ class TokopediaScraper:
         phone_enc = self.encode_phone(phone)
         return f"https://accounts.tokopedia.com/otp/c/page?otp_type=112&m_encd={phone_enc}&popup=false&header=true&redirect_parent=false&ld=https%3A%2F%2Faccounts.tokopedia.com%2Flpn%2Fusers%3Fencoded%3D{phone_enc}%26client_id%3D%26redirect_uri%3D%26state%3D"
 
-    def request_otp_by_email(self, driver, email, password):
+    def request_otp_by_email(self, driver, email, password, otp=None):
         """
         Request OTP by email
         @email: email
@@ -65,8 +65,49 @@ class TokopediaScraper:
         sleep_time(2)
         driver.find_element_by_xpath("//div[@id='cotp__method--sms']").click()
         sleep_time(2)
-        login_token = driver.current_url.split("page?")[1]
-        return {"login_token": login_token}
+        messages = driver.find_element_by_xpath("//p[@class='cotp__text--dest text-black54 cotp--sms']").text
+        sleep_time(1)
+        if not otp:
+            messages = messages.replace("\n", " ")
+            login_token = driver.current_url
+            return {"login_token": login_token, "message": messages}
+        for index, number in enumerate(otp, start=1):
+            driver.find_element_by_xpath(f"//input[@id='otp-number-input-{index}']").send_keys(number)
+            sleep_time(1)
+        sleep_time(1)
+        base_url = "http://tokopedia.com"
+        driver.get(base_url + "/order-list")
+        sleep_time(2)
+        sess = requests.Session()
+        for cookie in driver.get_cookies():
+            sess.cookies.set(cookie['name'], cookie['value'])
+        json_data = json.dumps(self.account_payload())
+        res = sess.post(self.gql_url, json_data, headers=self.headers)
+        return json.loads(res.text)
+
+    def send_otp_by_email(self, driver, login_token, otp):
+        base_url = "http://tokopedia.com"
+        driver.get(base_url)
+        sleep_time(2)
+        login_url = "https://accounts.tokopedia.com/otp/c/page?" + login_token
+        driver.get(login_token)
+        print("Login URL: " + login_url)
+        sleep_time(2)
+        driver.find_element_by_xpath("//div[@id='cotp__method--sms']").click()
+        sleep_time(2)
+        for index, number in enumerate(otp, start=1):
+            driver.find_element_by_xpath(f"//input[@id='otp-number-input-{index}']").send_keys(number)
+            sleep_time(1)
+        sleep_time(1)
+        driver.get(base_url + "/order-list")
+        sleep_time(2)
+        sess = requests.Session()
+        for cookie in driver.get_cookies():
+            sess.cookies.set(cookie['name'], cookie['value'])
+        json_data = json.dumps(self.account_payload())
+        res = sess.post(self.gql_url, json_data, headers=self.headers)
+        datares = json.loads(res.text)
+        return datares, True
     
     def request_otp(self, phone):
         """
@@ -402,17 +443,3 @@ class TokopediaScraper:
                 """
             }
         ]
-
-# TODO
-# dibutuhkan untuk setelah otp/login :
-# - account _holder
-# - account number (bisa no rekening jika bank, no hp untuk e-wallet biasanya)
-# untuk retrieval :
-# balance dari banks/ewalletnya
-# list of transaksi dimana setiap transaksi memiliki :
-# value (jumlah income/outcome)
-# nama/judul (nama transaksi spr transfer ke x, pembayaran ke x)
-# tanggal transaksi
-# tipe transkasi ("kredit/debit")
-# status transaksi(success or pending or etc)
-
