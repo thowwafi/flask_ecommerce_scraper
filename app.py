@@ -57,21 +57,19 @@ def send_otp_by_email():
     """
     @Body:
     {
-        "login_token": "",
+        "validate_token": "",
         "otp": "627091"
     }
     """
     request_data = request.json
-    login_token = request_data.get('login_token')
     otp = request_data.get('otp')
-    email = request_data.get('email')
-    password = request_data.get('password')
+    validate_token = request_data.get('validate_token')
 
     response = {}
-    # if not login_token or not otp:
-    #     response['status'] = 'Failed'
-    #     response['message'] = 'Login Token/OTP cannot be null'
-    #     return jsonify(response), 400
+    if not validate_token or not otp:
+        response['status'] = 'Failed'
+        response['message'] = 'Login Token/OTP cannot be null'
+        return jsonify(response), 400
 
     driver, message = initialize_webdriver(app.root_path)
     if not driver:
@@ -80,15 +78,15 @@ def send_otp_by_email():
         return jsonify(response), 500
     tokped = TokopediaScraper()
     try:
-        login_data = tokped.request_otp_by_email(driver, email, password, otp)
+        login_data, ok = tokped.send_otp_by_email(driver, otp, validate_token=validate_token)
     except Exception as e:
         response['status'] = 'Failed'
         response['message'] = str(e)
         return jsonify(response), 500
-    # if not ok:
-    #     response['message'] = str(login_data)
-    #     response['status'] = 'Failed'
-    #     return jsonify(response), 500
+    if not ok:
+        response['message'] = str(login_data)
+        response['status'] = 'Failed'
+        return jsonify(response), 500
 
     try:
         session_token = tokped.get_session_token(driver)
