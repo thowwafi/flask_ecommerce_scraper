@@ -8,6 +8,7 @@ from selenium.webdriver.common.keys import Keys
 
 class TokopediaScraper:
     gql_url = "https://gql.tokopedia.com/"
+    base_url = "http://tokopedia.com"
     headers = {
         "User-Agent": "Mozilla/5.0 (X11; CrOS x86_64 12871.102.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.141 Safari/537.36",
         "authority": "gql.tokopedia.com",
@@ -47,7 +48,8 @@ class TokopediaScraper:
         Generate url from encoded phone number
         """
         phone_enc = self.encode_phone(phone)
-        return f"https://accounts.tokopedia.com/otp/c/page?otp_type=112&m_encd={phone_enc}&popup=false&header=true&redirect_parent=false&ld=https%3A%2F%2Faccounts.tokopedia.com%2Flpn%2Fusers%3Fencoded%3D{phone_enc}%26client_id%3D%26redirect_uri%3D%26state%3D"
+        return f"https://accounts.tokopedia.com/otp/c/page?otp_type=112&m_encd={phone_enc}&popup=false&header=true&redirect_parent=false\
+            &ld=https%3A%2F%2Faccounts.tokopedia.com%2Flpn%2Fusers%3Fencoded%3D{phone_enc}%26client_id%3D%26redirect_uri%3D%26state%3D"
 
     def request_otp_by_email(self, driver, email, password):
         """
@@ -84,10 +86,12 @@ class TokopediaScraper:
             'expiry': 1645426369,
             'sameSite': 'Lax'
         }
-        base_url = "http://tokopedia.com"
-        driver.get(base_url)
+        driver.get(self.base_url)
         sleep_time(2)
-        login_url = f"https://accounts.tokopedia.com/otp/c/page?allownold=1&b=&func_param=last_decline%7Chttps%3A%2F%2Faccounts.tokopedia.com%2Fauthorize%3Fclient_id%3De7904256bd65412caec177cb4213e0c7%26login_type%3D%26login_using%3Dotp%26p%3Dhttps%253A%252F%252Fwww.tokopedia.com%26redirect_uri%3Dhttps%25253A%25252F%25252Fwww.tokopedia.com%25252Fappauth%25252Fcode%26response_type%3Dcode%26state%3D{state}%26theme%3D&load_func_url=https%3A%2F%2Faccounts.tokopedia.com%2Flogin%2Fassets%3Ftype%3Dsqbl&msisdn=&otp_type=134"
+        login_url = f"https://accounts.tokopedia.com/otp/c/page?allownold=1&b=&func_param=last_decline%7Chttps%3A%2F%2Faccounts.tokopedia.com\
+            %2Fauthorize%3Fclient_id%3De7904256bd65412caec177cb4213e0c7%26login_type%3D%26login_using%3Dotp%26p%3Dhttps%253A%252F%252Fwww.tokopedia.com\
+            %26redirect_uri%3Dhttps%25253A%25252F%25252Fwww.tokopedia.com%25252Fappauth%25252Fcode%26response_type%3Dcode%26state%3D{state}\
+            %26theme%3D&load_func_url=https%3A%2F%2Faccounts.tokopedia.com%2Flogin%2Fassets%3Ftype%3Dsqbl&msisdn=&otp_type=134"
         driver.add_cookie(cookie)
         driver.get(login_url)
         print("Login URL: " + login_url)
@@ -97,7 +101,7 @@ class TokopediaScraper:
         for index, number in enumerate(otp, start=1):
             driver.find_element_by_xpath(f"//input[@id='otp-number-input-{index}']").send_keys(number)
         sleep_time(1)
-        driver.get(base_url + "/order-list")
+        driver.get(self.base_url + "/order-list")
         sleep_time(2)
         sess = requests.Session()
         for cookie in driver.get_cookies():
@@ -212,8 +216,7 @@ class TokopediaScraper:
         return f"https://accounts.tokopedia.com/lpn/users?encoded={phone_enc}&client_id=&redirect_uri=&state=&validate_token={validate_token}"
 
     def login_with_email(self, driver, email, login_url, phone):
-        base_url = "http://tokopedia.com"
-        driver.get(base_url)
+        driver.get(self.base_url)
         res = requests.get(login_url, headers=self.headers)
         if res.status_code == 403:
             return "Your validate token is expired. Please create new session.", False
@@ -227,7 +230,7 @@ class TokopediaScraper:
                 return f"Email {email} not found.", False
             selected_el[0].click()
         sleep_time(2)
-        driver.get(base_url + "/order-list")
+        driver.get(self.base_url + "/order-list")
         sleep_time(2)
         sess = requests.Session()
         for cookie in driver.get_cookies():
