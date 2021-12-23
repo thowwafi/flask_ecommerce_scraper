@@ -68,10 +68,9 @@ class TokopediaScraper:
         messages = driver.find_element_by_xpath("//p[@class='cotp__text--dest text-black54 cotp--sms']").text
         sleep_time(1)
         messages = messages.replace("\n", " ")
-        login_token = driver.current_url
         cookies = self.get_session_token(driver)
         state = driver.current_url.split("state%3D")[1].split("%26theme")[0]
-        return {"login_token": login_token, "message": messages, "session_token": cookies +"--state--"+ state}
+        return {"message": messages, "session_token": cookies +"--state--"+ state}
 
     def send_otp_by_email(self, driver, otp, validate_token=None):
         token, state = validate_token.split("--state--")
