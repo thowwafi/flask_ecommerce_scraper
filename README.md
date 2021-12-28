@@ -16,6 +16,40 @@ python app.py
 - Put `geckodriver` in the root path
 
 ## Tokopedia API requests
+### Using Email
+1. Request OTP by email
+```
+URL = http://127.0.0.1:5000/api/request_otp_by_email/
+Method = POST
+Body:
+{
+    "email": "someone@gmail.com",
+    "password": "password"
+}
+Response:
+{
+    "message": "Kode verifikasi telah dikirimkan melalui SMS ke ****-****-*003",
+    "validate_token": "",
+    "status": "Success"
+}
+```
+2. Send OTP by Email
+```
+URL = http://127.0.0.1:5000/api/send_otp_by_email/
+Method = POST
+Body:
+{
+    "validate_token": "",
+    "otp": "627091"
+}
+Response:
+{
+    "message": "Successfully login",
+    "session_token": session_token,
+    "data": login_data
+}
+```
+### Using Phone Number
 1. Request OTP
 ```
 URL = http://127.0.0.1:5000/api/request_otp/

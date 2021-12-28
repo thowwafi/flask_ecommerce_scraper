@@ -72,7 +72,7 @@ class TokopediaScraper:
         messages = messages.replace("\n", " ")
         cookies = self.get_session_token(driver)
         state = driver.current_url.split("state%3D")[1].split("%26theme")[0]
-        return {"message": messages, "session_token": cookies +"--state--"+ state}
+        return {"message": messages, "validate_token": cookies +"--state--"+ state}
 
     def send_otp_by_email(self, driver, otp, validate_token=None):
         token, state = validate_token.split("--state--")
