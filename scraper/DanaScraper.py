@@ -77,7 +77,7 @@ class DanaScraper:
             elem = driver.find_element_by_xpath("//input")
             elem.send_keys(o)
         sleep_time(2)
-        delay = 2
+        delay = 5
         try:
             toast = WebDriverWait(driver, delay).until(EC.presence_of_element_located((By.CLASS_NAME, 'toast ')))
             print('myElem', toast.text)
@@ -87,9 +87,12 @@ class DanaScraper:
             pass
 
         driver.get(self.completed_url)
-        sleep_time(2)
-        if driver.current_url != self.completed_url:
-            return "Session not created, please try again.", False
+        try:
+            WebDriverWait(driver, delay).until(EC.presence_of_element_located((By.CLASS_NAME, 'wrapper-transactions')))
+        except TimeoutException:
+            return f"Session not created, please try again. Current URL: {driver.current_url}", False
+        # if driver.current_url != self.completed_url:
+        #     return f"Session not created, please try again. Current URL: {driver.current_url}", False
 
         session_token =  "".join(
             f"{cookie['name']}={cookie['value']};"
