@@ -156,11 +156,12 @@ def send_otp():
     request_data = request.json
     phone = request_data.get('phone')
     otp = request_data.get('otp')
+    pin = request_data.get('pin')
 
     response = {}
     if not phone or not otp:
         response['status'] = 'Failed'
-        response['message'] = 'Phone/OTP cannot be null'
+        response['message'] = 'Phone/OTP/PIN cannot be null'
         return jsonify(response), 400
 
     tokped = TokopediaScraper()
@@ -193,7 +194,7 @@ def send_otp():
 
     login_url = tokped.create_login_url(validate_token, phone)
     try:
-        login_data, ok = tokped.login_with_email(driver, None, login_url, phone)
+        login_data, ok = tokped.login_with_email(driver, None, login_url, phone, pin)
     except Exception as e:
         response['message'] = str(e)
         response['status'] = 'Failed'
@@ -225,6 +226,7 @@ def login():
     phone = request_data.get('phone')
     validate_token = request_data.get('validate_token')
     email = request_data.get('email')
+    pin = request_data.get('pin')
     response = {}
     if not phone or not validate_token or not email:
         response['message'] = "phone, validate_token, email cannot be null."
@@ -241,7 +243,7 @@ def login():
     login_url = tokped.create_login_url(validate_token, phone)
 
     try:
-        login_data, ok = tokped.login_with_email(driver, email, login_url, phone)
+        login_data, ok = tokped.login_with_email(driver, email, login_url, phone, pin)
     except Exception as e:
         response['message'] = str(e)
         response['status'] = 'Failed'

@@ -4,6 +4,7 @@ import json
 from utils.utils import sleep_time
 import requests
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.action_chains import ActionChains
 
 
 class TokopediaScraper:
@@ -215,7 +216,7 @@ class TokopediaScraper:
         phone_enc = self.encode_phone(phone)
         return f"https://accounts.tokopedia.com/lpn/users?encoded={phone_enc}&client_id=&redirect_uri=&state=&validate_token={validate_token}"
 
-    def login_with_email(self, driver, email, login_url, phone):
+    def login_with_email(self, driver, email, login_url, phone, pin):
         driver.get(self.base_url)
         res = requests.get(login_url, headers=self.headers)
         if res.status_code == 403:
@@ -230,7 +231,14 @@ class TokopediaScraper:
                 return f"Email {email} not found.", False
             selected_el[0].click()
         sleep_time(2)
-        driver.get(self.base_url + "/order-list")
+        if 'otp' in driver.current_url and not pin:
+            return "You need to enter your pin.", False
+        actions = ActionChains(driver)
+        actions.send_keys(pin)
+        actions.perform()
+        print("enter_pin")
+        sleep_time(2)
+        driver.get(f'{self.base_url}/order-list')
         sleep_time(2)
         sess = requests.Session()
         for cookie in driver.get_cookies():
