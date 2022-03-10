@@ -240,6 +240,8 @@ class TokopediaScraper:
         sleep_time(2)
         driver.get(f'{self.base_url}/order-list')
         sleep_time(2)
+        if 'login' in driver.current_url:
+            return "Wrong PIN number.", False
         sess = requests.Session()
         for cookie in driver.get_cookies():
             sess.cookies.set(cookie['name'], cookie['value'])
